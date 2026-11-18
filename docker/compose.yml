@@ -30,7 +30,7 @@ x-test: &test
   volumes:
     - bootstrap:/bootstrap:ro
   environment:
-    GROW_GRAYLOG_URL: ${GROW_GRAYLOG_URL:-http://service:9000}
+    GROW_GRAYLOG_URL: ${GROW_GRAYLOG_URL:-http://graylog:9000}
     GROW_BOOTSTRAP_ENV: /bootstrap/env
     GROW_TEST_RUN_ID: ${GROW_TEST_RUN_ID:-local}
   init: true
