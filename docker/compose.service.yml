@@ -1,0 +1,116 @@
+# Graylog Open 7.0 + MongoDB + OpenSearch for the grow-graylog SDK integration suite (GRO-1373).
+#
+# Image tags match the Grow stack catalog / docker template seeds (platform 9dc61370):
+#   graylog/graylog:7.0 (resolved to 7.0.16 on 2026-11-18), mongo:8.2.3-noble,
+#   opensearchproject/opensearch:2.19.0.
+# No host ports are published. Test containers on the default network use
+#   GROW_GRAYLOG_URL=http://graylog:9000  and read /bootstrap/env (volume `bootstrap`).
+# Host requirement: vm.max_map_count >= 262144 (OpenSearch).
+#
+# All credentials below are disposable test fixtures for this private compose network only.
+
+x-graylog-test-credentials: &graylog-test-credentials
+  GRAYLOG_INIT_URL: http://graylog:9000
+  GRAYLOG_INIT_USER: admin
+  # Test-only root password; its SHA-256 is GRAYLOG_ROOT_PASSWORD_SHA2 on the graylog service.
+  GRAYLOG_INIT_PASSWORD: grow-sdk-test-password
+
+services:
+  mongodb:
+    # Catalog tag is mongo:8.2.3-noble. MongoDB 8.x crashes (SIGSEGV, exit 139) or refuses to start on
+    # Linux kernels 6.19 .. 7.0.13 (SERVER-121912, TCMalloc vs rseq ABI). verify.sh / the Makefile set
+    # GRAYLOG_SDK_MONGO_IMAGE=mongo:7.0.48-jammy on such hosts (Graylog 7.0 supports MongoDB 7.0-8.2).
+    image: ${GRAYLOG_SDK_MONGO_IMAGE:-mongo:8.2.3-noble}
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
+    command: ["mongod", "--bind_ip_all", "--quiet"]
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping:1}).ok ? 0 : 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  opensearch:
+    image: opensearchproject/opensearch:2.19.0
+    environment:
+      discovery.type: single-node
+      plugins.security.disabled: "true"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      cluster.routing.allocation.disk.threshold_enabled: "false"
+      bootstrap.memory_lock: "false"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=4s' >/dev/null"]
+      interval: 5s
+      timeout: 6s
+      retries: 60
+      start_period: 20s
+
+  service:   # service under test (harness contract); reachable as `graylog`
+    networks:
+      default:
+        aliases: [graylog]
+    image: graylog/graylog:7.0
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+    environment:
+      GRAYLOG_NODE_ID_FILE: /usr/share/graylog/data/config/node-id
+      # >= 16 characters; test-only value.
+      GRAYLOG_PASSWORD_SECRET: grow-sdk-test-password-secret-0123456789
+      # sha256("grow-sdk-test-password")
+      GRAYLOG_ROOT_PASSWORD_SHA2: f138f1030bbbf03d84368f8682b8c8f0c3006dd2697c99a9fb5c921f25f9ffda
+      GRAYLOG_ROOT_TIMEZONE: UTC
+      GRAYLOG_HTTP_BIND_ADDRESS: 0.0.0.0:9000
+      GRAYLOG_HTTP_EXTERNAL_URI: http://graylog:9000/
+      GRAYLOG_ELASTICSEARCH_HOSTS: http://opensearch:9200
+      GRAYLOG_MONGODB_URI: mongodb://mongodb:27017/graylog
+      GRAYLOG_SERVER_JAVA_OPTS: -Xms1g -Xmx1g -XX:+UseG1GC -server -XX:-OmitStackTraceInFastThrow
+      # Faster test feedback: flush outputs every second (default 1 s, kept explicit).
+      GRAYLOG_OUTPUT_FLUSH_INTERVAL: "1"
+      GRAYLOG_TELEMETRY_ENABLED: "false"
+      GRAYLOG_VERSIONCHECKS: "false"
+    volumes:
+      - graylog-data:/usr/share/graylog/data
+    healthcheck:
+      # /api/system/lbstatus is unauthenticated: 200 "ALIVE", 503 "DEAD", 429 "THROTTLED".
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/api/system/lbstatus | grep -q ALIVE"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+  # One-shot: creates GELF UDP/TCP/HTTP (+ OTLP gRPC when installed) inputs and an API token,
+  # then writes /bootstrap/env. Idempotent (re-run keeps inputs, reuses a still-valid token).
+  bootstrap:
+    image: curlimages/curl:8.23.0
+    user: "0:0"
+    depends_on:
+      service:
+        condition: service_healthy
+    environment:
+      <<: *graylog-test-credentials
+    entrypoint: ["/bin/sh", "/scripts/bootstrap.sh"]
+    volumes:
+      - ./bootstrap:/scripts:ro
+      - bootstrap:/bootstrap
+    restart: "no"
+
+volumes:
+  mongodb-data:
+  opensearch-data:
+  graylog-data:
+  bootstrap:
