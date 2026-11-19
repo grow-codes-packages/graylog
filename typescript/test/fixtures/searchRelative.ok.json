@@ -1,0 +1,467 @@
+{
+  "function": "searchRelative",
+  "case": "ok",
+  "request": {
+    "method": "POST",
+    "path": "/api/views/search/sync",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Authorization": "Basic <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "queries": [
+        {
+          "id": "q1",
+          "query": {
+            "type": "elasticsearch",
+            "query_string": "marker:growsdk179503370112643"
+          },
+          "timerange": {
+            "type": "relative",
+            "range": 300
+          },
+          "search_types": [
+            {
+              "id": "st1",
+              "type": "messages",
+              "limit": 50,
+              "offset": 0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "execution": {
+        "done": true,
+        "cancelled": false,
+        "completed_exceptionally": false
+      },
+      "results": {
+        "q1": {
+          "query": {
+            "id": "q1",
+            "timerange": {
+              "range": 300,
+              "type": "relative"
+            },
+            "filter": {
+              "type": "or",
+              "filters": [
+                {
+                  "type": "stream",
+                  "id": "6afe0a6607ba3acebff1894e"
+                },
+                {
+                  "type": "stream",
+                  "id": "000000000000000000000001"
+                }
+              ]
+            },
+            "filters": [],
+            "query": {
+              "type": "elasticsearch",
+              "query_string": "marker:growsdk179503370112643"
+            },
+            "search_types": [
+              {
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "stream_categories": [],
+                "type": "messages",
+                "id": "st1",
+                "name": null,
+                "limit": 50,
+                "offset": 0,
+                "sort": null,
+                "fields": [],
+                "decorators": [],
+                "filter": null,
+                "filters": []
+              }
+            ]
+          },
+          "execution_stats": {
+            "duration": 13,
+            "timestamp": "2026-11-18T20:28:23.867Z",
+            "effective_timerange": {
+              "from": "2026-11-18T20:23:23.861Z",
+              "to": "2026-11-18T20:28:23.861Z",
+              "type": "absolute"
+            }
+          },
+          "search_types": {
+            "st1": {
+              "id": "st1",
+              "messages": [
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 225,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.988",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53206,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8HX0000018059E8M9JR",
+                    "source": "grow-sdk-verify",
+                    "transport": "http-bulk-gzip",
+                    "message": "growsdk179503370112643 http-bulk-gzip #4",
+                    "gl2_source_input": "6afe0a5a07ba3acebff188e6",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.007",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c7def4-e38e-11f1-8dde-020650dd320d",
+                    "seq": 4,
+                    "gl2_processing_duration_ms": 19,
+                    "timestamp": "2026-11-18T20:28:22.973Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 225,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.988",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53206,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8HX0000010EJ34VV50P",
+                    "source": "grow-sdk-verify",
+                    "transport": "http-bulk-gzip",
+                    "message": "growsdk179503370112643 http-bulk-gzip #3",
+                    "gl2_source_input": "6afe0a5a07ba3acebff188e6",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.007",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c7def1-e38e-11f1-8dde-020650dd320d",
+                    "seq": 3,
+                    "gl2_processing_duration_ms": 19,
+                    "timestamp": "2026-11-18T20:28:22.973Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 225,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.988",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53206,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8HX000000X9V73010E9",
+                    "source": "grow-sdk-verify",
+                    "transport": "http-bulk-gzip",
+                    "message": "growsdk179503370112643 http-bulk-gzip #2",
+                    "gl2_source_input": "6afe0a5a07ba3acebff188e6",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.007",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c7def3-e38e-11f1-8dde-020650dd320d",
+                    "seq": 2,
+                    "gl2_processing_duration_ms": 19,
+                    "timestamp": "2026-11-18T20:28:22.973Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 225,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.988",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53206,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8HX000000KM5K2DJPY8",
+                    "source": "grow-sdk-verify",
+                    "transport": "http-bulk-gzip",
+                    "message": "growsdk179503370112643 http-bulk-gzip #1",
+                    "gl2_source_input": "6afe0a5a07ba3acebff188e6",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.007",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c7def2-e38e-11f1-8dde-020650dd320d",
+                    "seq": 1,
+                    "gl2_processing_duration_ms": 19,
+                    "timestamp": "2026-11-18T20:28:22.973Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 225,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.988",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53206,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8HX000000BMHN3SNEJH",
+                    "source": "grow-sdk-verify",
+                    "transport": "http-bulk-gzip",
+                    "message": "growsdk179503370112643 http-bulk-gzip #0",
+                    "gl2_source_input": "6afe0a5a07ba3acebff188e6",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.007",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c7def0-e38e-11f1-8dde-020650dd320d",
+                    "seq": 0,
+                    "gl2_processing_duration_ms": 19,
+                    "timestamp": "2026-11-18T20:28:22.973Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 203,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.973",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53638,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8GT000000N3D0FPQ8MG",
+                    "source": "grow-sdk-verify",
+                    "transport": "tcp",
+                    "message": "growsdk179503370112643 tcp #2",
+                    "gl2_source_input": "6afe0a5807ba3acebff188dd",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.006",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c65853-e38e-11f1-8dde-020650dd320d",
+                    "seq": 2,
+                    "gl2_processing_duration_ms": 33,
+                    "timestamp": "2026-11-18T20:28:22.938Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 203,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.973",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53638,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8GT000000FWH0HXYE5Q",
+                    "source": "grow-sdk-verify",
+                    "transport": "tcp",
+                    "message": "growsdk179503370112643 tcp #1",
+                    "gl2_source_input": "6afe0a5807ba3acebff188dd",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.006",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c65854-e38e-11f1-8dde-020650dd320d",
+                    "seq": 1,
+                    "gl2_processing_duration_ms": 33,
+                    "timestamp": "2026-11-18T20:28:22.938Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 203,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.966",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53638,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8GT0000007G6NEGCDBC",
+                    "source": "grow-sdk-verify",
+                    "transport": "tcp",
+                    "message": "growsdk179503370112643 tcp #0",
+                    "gl2_source_input": "6afe0a5807ba3acebff188dd",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.006",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c65856-e38e-11f1-8dde-020650dd320d",
+                    "seq": 0,
+                    "gl2_processing_duration_ms": 40,
+                    "timestamp": "2026-11-18T20:28:22.938Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 205,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.974",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53202,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8GT00000068Y49AK459",
+                    "source": "grow-sdk-verify",
+                    "transport": "http",
+                    "message": "growsdk179503370112643 http #0",
+                    "gl2_source_input": "6afe0a5a07ba3acebff188e6",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.006",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c65855-e38e-11f1-8dde-020650dd320d",
+                    "seq": 0,
+                    "gl2_processing_duration_ms": 32,
+                    "timestamp": "2026-11-18T20:28:22.938Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 12241,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.978",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 42562,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8GS000000WXEK1F7Y17",
+                    "source": "grow-sdk-verify",
+                    "transport": "udp-chunked-gzip",
+                    "message": "growsdk179503370112643 udp-chunked-gzip #0",
+                    "gl2_source_input": "6afe0a5707ba3acebff188d4",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.007",
+                    "full_message": "9d62c21dca57951b1ab17b764d82cdb48625eed99006dd89075436dc4f14eb9c317a9634a3837c9092f70a942ad1757a49f2b7bad8722dfe8b1515ae271c440e295deb7a758ce04d9e9dcabe12dc84ca5c27afdc09122b605cfbd4bd70a6199e106bac45ef011bc77426fda43122c3ad910993b29ea3ea2471e02311049d9a0b19d441d135bc9344a4904fd2425ec196c3819e9f383e586289d7735f26876249713b444f8c964233e61f32202159346f0505bd60b33a25dd23ccd8d74e5a79af47d468af52a35eabc80adae9bbad3cf38af32044f5c9d83110cba5b55bcf0a29f44b46e0e226d3712453800af8f59545110ffb4895b1d4d8b9290886151bb9f8fc5ce0440a765da507a68ad2e3c281c4f9e5e652884be72db7f869ae2f6cab5f41d43a8b25c773882af2370de0b3632b7118ba3aa511d0b4da029761154352427679b8747aacb21d753a7f1086cdad602384078fd03aaedbee6118abd1acc569260a8d584696ea0f9ffa04a7a26f64c48e5e7a3297d9765cf1ad98d78cad272e65fb7d1c75c0a05c14b51a29195cbb81b07f33e081bfe8a7b67378a38cbab67f96472e0f48e89a387d1c22c4bde5db25808d4872feee3607fe3480ea832f6f0c800b76d3a311fab9556ec941d42b07c7ba4605af22909125b4692fec00d8fe696af9eea26333afc4aed4650db6bb373ced74c638f62487a4443c32cb62fe0d89a2a3c9c93fb09aeee0bfc7ce152be0d8a65fc4f4083749ce8ec69f2e929e01bed4b5a284ee8170ec82483f12097eec50eb5030781a163c5278a158bc26289bc182dcb0424295fb3476e88faead003847ce2a379bcc53857b35dd35f186f34feca403ebc14d5e165ee2ce7d61ab548d99cf60667d09383ebb1892f340cc5cf0c86a7ce32258aea988f021633e25e2ab97053111fcbcd0fc0b8c9ca7aa38d71a9a95e8cd2c619b1f9acea5a7d9054e5a068f80780257197c587bd0ba44cb1710e48b8c2aaf3968959b18fcc04d6f2fd80342e40a7e9f1eee43da49d60196fccb7407145b15c60c60edd6bae70e13036eabca31a8673143fddb794a4462bd2b8f1c6fe8e6743cd4294948071d408098f30f6e68f35b43ac01f1a0e7dd6e08c541439a26c307ae3798afef1a878c6b3bf4358d90186922be5f222e748f3456d4df5689e7a1ebcb190896bf41ccf87b99df23839e546aaf85245a881127677cfde5bb662481cb0955958993912aa0a6bc5585285afb5cbe6838969097cf1fd5acaaa917ce96a9348be5e2ac06bfbb7d6521d7fd2aa353be8497421a1b5900bd763cb8e5e5ce000ddb851c2b0783a318994deac0366c6c21bc3f5d843c85afaa959fb5f74c6624794dfe1e56d99c251c26728b25a80b6c2684b0ac0618636c8b13d908b0d5d0e38aaaf467da3d5674de8be2e214c36d513bb05177372298f75ab226d1d2f21830e18236f0b503f85b0d8a419ddf9e4e4289567946292431fc04e1ae4a88bfce4175f9073cfa356350a9a859e3b522ca9659ace5490978ab4e2b333d03c828543c185665ddd59cac8b29dfd7323729ea6779ef5a13dd31be3c43ff2ac899c2ed869cbec9058cc6100590a774351256480f5fb8588e8dd11aba8fa9a8d91170bc462faac53587c20fc04a65591a5929eb3d3066760329676fc089b16f3673a78d42ee1e649baf428a1b1f45169da710bc4501e48de09f1a98520ae95194d55230df21b9c2af8d1a9f8409c94025e12cf75d94652ea615628bd2bce59f61a13fb350c2a790829a54583ed0c7403a47142f29f97dca53086c270b97296ad5d95956024f99d6ef34ea4645c72b4bbb41d5fae5af5e80c0f35edc1a3b82c062d9e470cd5c0f0ff63b5824ff3cb0b6e4dff684b46c621e854a3abc5dc39beec79ff54118dfe8384510481d72403c5d9fc4f0607c8289baa4f7cc26467a6bd33e4c8393231a9084dcab71c9fb80d63b7a7e07e2786e29d3e7eee9c59ebd8c0189b486d298c7ce6e9049b3abcca4f1a0ad8e80a75cdcb2b1ef45b9a89c8ddbd97751c7d539ab360eef7acd615c492bd48152f5574e66ac4f1f4bf535f91605b143f8729972063893c661c1177ab7a1f191749ebfbd93dc9c849873b07cd73cab49ce053576e44c62f6baacbf28a13130a94776b196a6d7b75ab8ec9f6f628349b65b39b48df8624d51b42f0bff814afb7e0601624730d907fabf87d29f778f19b9ba883d2ab6ae418c863a3b1a52a65b48da55062a8f8199cc16e7bf785a7b64e80b8fb5872f50b83467cae8a2452a18dde0c9aff5383943df7f49273b123a8b002f3f24f19a0e4182bff9286a1f6c4110c5125010e72a2500989036a55741962620a0c8914c31c27f4e56cae791a198fc6793f039e231a16dab84cd87b416f5e4b595b167960867226f7f1b70928922311bb4242244a530d1ad8426ecadce89190f50a82c2758af37829669870a218fff237239c6d4a27c433a87b3c81c51f1bed267028707e7892ae5a56d76ecbc5626dcc0ea334b1fcb6a68abbb2ca3654eddfbe2f7d8271fc5e9acb3e6a0d5d5e6fe8fcb657a2be61e9b2ce8d522e1526696a0e444c77fba029cdbaaf3cf34f89cc3e7a15386df5db0237c34cda3459483196d04ffcf826769869856457ebc88176ecd14f72df1e16892600d32c700baee5c898d1aff03ee1b437b09ec45829a7f5646c4be931bcc4f15d257d039d685c6e3cec73e4cf3b5b820328b340ec78e2ea4aea8674e05e56d258cd2c0dae76570ca24021d560d8d262574c71d90f99de93a059e972d169666c2dea78283bd5e1f900eee8e48ab18a7baa103c8e872134fc2fb08e2ea141caefd2bb5cb09c6205fcbf5ecc03375ff854a611fa59e73405f04968ff087dc00129c15b810f24f4ec7441cb24f56f24179129552cd2e169c67e5385d63ce05340331c2b1b967da249bd3b3e1074b378709300ccd83499b4266c1b913ea868c562e630498bbb5be7bbca4a12aee66881f1e489cf54bb1af00cc66804fadba25f422a855c6b68f0341fec17856bbb1fe973b4760ad99846e8be5dabe9b0ea3c7f491c80a8c9e11ac84cea852cb1e30d6580aaa26e8ba99d09afd25971fed7129c7b079cb35711fdcc34b074bb1f79d5cdbaff5086b2f82311ad57c2cfe9c8ad8e6fb2bcc5e2ab6e60c9248050304da9176a96c14817ae47ad89664e76dde671fbd592e1798761fefcbb9328b10da7e56c8f73782145db7175d5433c319069131445b9d86981f02d35fc072b10df392985e38e36b9c8f7775d59f6ffb587326a2c7bfba86300238a5603822a7872c9dbeab88ccfe10d4ac1a4ce19f5cbe9dc32309dc770edf09960dfaedfd9be7bc582cdc5f509ab0e712666d81c11e1a5246319f01b35e2711c9418f58aea6890f0ab5d227d13ccb0da96822072a6b024dcfaa6741041c937d2b09232d8236c87f3a13be7838c516d4326dc9991737e250ed7ee34f5a8524042386c73a6b4a74a5be18db06231058990f74d2724aacde60121ba84a0677723bbee47e6e0073eb02b13dcfd7b32b4989577f43f9ff0ea1bbbbab6e3022c9551580c35226c07900d61177be985aa6cbdf3ad2d7186f2ef2c42a2fa4916a1db90b7681cbbd1d3b6c9c2d0b71f4040aacfaf99e9f2ee84cef387a9fe3d529e84e3aa1a7d3c5f8f607847a02493fb88ba2de731f4f00e5a75de7da3adf34c1903bdc30f87a2b617e33aff938807fc136db63fc7af1b8bcebcbe6f49f4d084eff935f6d2addbd285ede717b1d229ca1ed2053f55a5f8e8e3639a5f3c5d79e8a7bdac55033df800e761a98957b5d3475b241ed1f23fd7730a56d37f4244a340fe2c30b6239e679fbaa1dc22256555b836a493ed00f41e953e7429f09d323eaae4286dbc56903be31ce5b821dfd823b35e4605dc929ac086967c852415ca1607ccfb98dee68e80631d4c466d143df71f57220370245ab36b5bd871ebb774d77ebc63a18cefad45e6651bdfb0020afb8b963185ec9e433aadec7c0672615e0a3f90cd233c4723fdb3dc62dab05e7a165f2944017066334f78327b5b945c35bb239d87e135f4a762cfc4e5f52ac61c95e5e6b40fd6108fb2af3ef9c6e745f9cfa9dff85093bef77d07c3698210247e84a9758bee33ea1872e7fcf2cee089cf390e65e2a44e50b2a0f1c6adbee2034f075df8260d21bd37af3e1f79836e52baec4268598882249b21e2c5529001b0571554c88f7ea5b7b26c5364485225c13c5f913f05e4e1b4d0de8ad2f299c9000826b698626df19672d9bebee23a7ca32982d81fccb8076747e387397d46e3d73630b272085140684dc0f3631076a2699f11219dcf73f150340e5fe712cfb1f534a88f0a2745258d7884557fd5d3b927b496e088b2240d809422346a5a4430a9c0a5a5ffca0d2852ec9652de044f31e225b4925847db8cbd4a9abf13c6edbd0729fa9ffbee18a574bba65065d7bb4243a4a7e5c8bd8b2eb25c463ec97f9fc49ba8770c0d09e67766853a6ec190d98fe7c70b3404f6716a97180b3dd00c3891133b4117c657e8106bb3637d841a17a2636606c63e2539bdda688ccabb4ebac2e7758185e2965a3d7f1e6977d27f0e3279f223d71dcca5f480a3ee90df4e10b0ca19cef1495446ea84f38c075cdf358480a3c6bc73026c42a61dcc2b9d80cd05956e931ec393f1486a3667fdc54933d87e0499e72e7a15054161d9c16555cae34a0cacde4f49c45442cd494eb2ea10cff614b535cb0b71d6854a60ea1f38e80d6ed343a930210d88da553a54a4b4b438ab6ff23602498b28a470ca23eadae412487189771582b4f1d38d41622ae0b37cd8700c0b764825e7b7828169e09c528e5288c100ab16671f657670414bf4ea5e47c0343d629a9b95541ca7fc657d715d6d5aaca932463daf5c4d920665fb63f60ea8944e2ac2427044c9e3284992d7caf2bf0c4431c6e4e7b575767a73ba6bfdb110e9098337684285b9bf3c12f69101746634ec11151a0b69ed392de18c1b18657c8c6ba0d4d5550c2ee0f2f7cc1d999c915eeacaf51f8bc15c3ce7fba79573c894823492ed99987bb7066037c3ac8b634d2f4741d457b26fc014965775872a7fd2559bb348593166ba850335ed01eb3e4bece4632f6aab9d19bcb71e4a01bc38048ba7ab11c614ee4af2d75428a08740c73bec09883a58d9b029e7aa6db7a7c08d4118e457d311ae4d08869801495aa1de2716e5721465ab4b7d1571dcf4f39354e4f2f4ed5b2f9518f2d1baa45432a4444cd6073a742a98b7aef2ff6413946d3745d47e87c5ad82a5edddb72c8270c9f1183805995c2b7b806cb94bf1c6bfefb3764246bf2f05171788bda5ae529b4f889f6778ccb45310a7c87e1cd52fe484765fe0a1c903cbf5caee055c824545d2ea5315c05a07b4188cb9f97dd2bd6b1a51f82f5089b794fbeb0f576b86b4094a3c7ac81bd2ba0a774e51698442d4a9d6b943549cab66bd3abfa352f00e0e646c2a8f8cf39725c9e92634f012ad082648602e92bf100d2e85db73403e87ff79199ed0838f6f5cd1517fbbb2665ec1b13e14a9db3ce2503110f675fbde2270489a79791e3305595d2c0dd05cfcb0149ed34b525307fda720ef2568b8f9f6a3e2243230ce6e599952eeb1e3556dbbb88b5f1536a1ce01397f4d409a251e277f1aba95c3e9fc7fe836f956cdb82733fdba3e5f54872210d9a7ba2e1edde80071d841f2224e62691c5748708a6d1c0211f784d677989bd9209854c4b80e674aa684747f196ff8953a3265f1beddfbc52c32b320988a99b2d2269274070566b0833429f6a6e2140b2cdb6047c12a71c68d2e2a9d63cbd9de17e535b5d7c65ad716f0f58261bbef9fc93c1aaaf8510509fe73d0cf37181f0ba0df1924b4f1b1502f8bd174986b2e58a975944f4e15f28e7cf57d009b3f0a7423ce26fb74cc9182b9e2ce3954612b59876c5ae65f5f7e356b209eeb7bcb06e274ca46786b2619bc5ce8cfc2eceaea13175e2b5f09dcca8c684d10ef22ff0ffdf86f695d11eb74ff61a9a1e66c7ccb89f51f59b6f1102b69c9e6bec23a8a858074a3e49b18d5c41e62000a1ef11cc9f0e2505f5070a95bb91463d117f09a9c1092007408476da3002ea343ed67c6dc42d88a93ad80a06b6e3b39b94bad122b10ba4498e0ae016ae9a1c1d5ec337f1c3b7882e0e275923a55cb46cf8dd00bd53be33b56ef010b679b680586d080306c414b789b4b52781528ed0314171b6c114919f058aa228e580b58db58723f78d25c8822560e546533b87b7368c90e48dfb01992e408bc79b756e74260dee8ce2d3cea8560c433a5f3d80a0ff0ae3cea68e777695a2a4f4e71d5ed1b78bb8c19ec1685ae7cf23f29a2bdb6d15ea66014db7db0d183f1be641781e3e1fb7020a18d93b1c42e8e24143f28341220717b0c5ad894fc7bd4d640a1245482c73c5ec9e4d3036c57b535517cde8f823820c93148df4de2152b50ecbeb696a9df0572e35d0cee0baa7b7d279fd3bc03c5cd823afd05bda592a542ec48e32033f9ce8fbe7fec8ef84c7574a955ed1c8934df96bb7a6da493b161041a22e489540c7ea3dea06e1d7e3e672da6817d41d88e467f011a71083fb6f7bd814bff8ed35964c937773a10985bf40976dbc36ed3d7fb633bdb45a54d4e8870284d5533671cbac94d9da45f1e3ff7a89d3d3c9ea7e4b41136d18496e0a9b0a44bd11bfeff9e3065ab6be78ecd92884788663df1f307f50431fd54d4b7e731e08bae0323ba203f72165be802f73126ef4056e99c071d33d404ea3ae61b8cc0e7c8969a285b3a8308f63d3fb1ff924ff66f663192a1f484545616fa667ff199075296d4f8507be4e10d6f406611e8b5fc081a95b0f39cc2c2823e7fc09e6c74184d41691e794bb15d51c7dba91a5c1040495ae8b7cb3d9cdb6195dc5b1d8373bd8de7c5e37d1400e61be86f69dc3ddaaf974fee7f5e36bd17a7bf0e0e567c9e78e41bde2ff2e096989275d9f1b1b117e66604c353e58f0e902b86949d6ca399a4883a5ab05053ecf1eb9b1ce69982668371df5bced5fdbe47337224489c2bdc9d3f5e9b2102111c4259053945cae6c08d61c5f6f8a675a75ad8af99f08b04a1f0998ef0f8dede9abfb688d19a8769b6b9d1d972a8ff26b5518443299ddb8f2020d66a701d77986ce287d66d7ce849f78067a9bd7a37fd669cf7689d17c1fb301bc2b261213f2ef54bc14a33a6a9ed454817a97b347e91e46d224adc235d3f792c0261bca5746285492f440a987cf3f85f819604d9eceaf8e540f587f9c56df874eec17e098790100ed092a2c5ab9a4663ef037518d5a21882486db93ba4b8f985f7524a3f20404be4c75484fbe750437f7c0b20098a4422f1ba7ab39500c1fadb4f32f98ccd4a0fd211ca469231b4101c4c99bc66a41dca4b313421e41ee5e51eae10b8a0b81aca54df0ad323e3c2aeabaa138fe225027dce02c13a4ed7b7ad7b1dd42aaa80b0f39ccb8d0839f09d3549ef505eaed5d2aa12d39328f9b29b07a5d07b74e0cdc75b53f65ce15c3e1891da7bc437cc62788885cc45852c0a6d842332ce7df7ea80296dd1615d733787cb3e507ec4946fe86f2eef925757a4c95b5cee686f87c76907503a51af3afa97799468b0f2c97466275e273fec1dacefe1613e6136ce05f1c38c543b9fa07258b737910ab47ebbe9c9f7b5f9ef4b77ab0d02ae145078ab383f01870bdd0aa459b8620fa3367f8dd02262c17360d59a54e7eb673deb1b7c3a03db5d7494fdd726293236dd055d659fd7be95c26494f29544e4713ebb663332307bd94184722cbbc03d86c498a5083a068f1d3ef607e648a23830eea02b568d552a69436bc06e1a8fcfd4e9fc2cfbb17996670029eefde5ec22dbece3f0949f882c59f1f02627611f39edf76db9e7f946ca17f6c98660aedb8077507841e2ee9a4d16924d0d33aa48428ce8c86a276014c344ba53ddc07fd3971e512bdda4914eeefe605e987ab236f390e243c8006f896e9fb894cccf2a161738f3bd9564dbc6fcf0ccb46689035983c04071acb2355402168e684bd97716591272a523368156fcdaf6ace9e4a7e143c843fd350c5af504a8d587fb9a4063e20b69307dbe1a5fe363488116ae7bdd5f5c96c999794aa09707428909ecc06e220bde47f50cc765ee7945382723e1ad8a7fd9b407828241a0ecaa590f5d66ba65c0e2621f92cce4fee95882c30223da0adbb85aed70c30ca731988b685c1a6692523d90ee076012afe13ceabf6c4f136234b323e719138f9154731c37c985d857c4b4363d668850b8b56a41570fdbb4974d90d48a30f146f372b4c9cbf1505b4d6f91b9d1f8aaaef902cf7e30b8e3004766351b12f2fd0565752433f687a071d6df531b14065de8e85f39f4e89478837a692793c6b53dbc3cab806708e514d7987f188af52a5a2b5888918d5c11d9f468d9b08712fdcf50427f16652cf6559afaf1b2a5e8b3beb8b7b14f94322b526469d02",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c7def5-e38e-11f1-8dde-020650dd320d",
+                    "seq": 0,
+                    "gl2_processing_duration_ms": 29,
+                    "timestamp": "2026-11-18T20:28:22.937Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 213,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.974",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 53644,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8GR000000QJMKCJSPBW",
+                    "source": "grow-sdk-verify",
+                    "transport": "udp-zlib",
+                    "message": "growsdk179503370112643 udp-zlib #0",
+                    "gl2_source_input": "6afe0a5707ba3acebff188d4",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.006",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c65851-e38e-11f1-8dde-020650dd320d",
+                    "seq": 0,
+                    "gl2_processing_duration_ms": 32,
+                    "timestamp": "2026-11-18T20:28:22.936Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 213,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.974",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 49005,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8GR000000EQ4A5R7BD8",
+                    "source": "grow-sdk-verify",
+                    "transport": "udp-gzip",
+                    "message": "growsdk179503370112643 udp-gzip #0",
+                    "gl2_source_input": "6afe0a5707ba3acebff188d4",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.006",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c6a670-e38e-11f1-8dde-020650dd320d",
+                    "seq": 0,
+                    "gl2_processing_duration_ms": 32,
+                    "timestamp": "2026-11-18T20:28:22.936Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                },
+                {
+                  "highlight_ranges": {},
+                  "message": {
+                    "gl2_accounted_message_size": 213,
+                    "gl2_receive_timestamp": "2026-11-18 20:28:22.966",
+                    "level": 6,
+                    "gl2_remote_ip": "172.30.0.5",
+                    "gl2_remote_port": 39866,
+                    "streams": ["000000000000000000000001", "6afe0a6607ba3acebff1894e"],
+                    "gl2_message_id": "01M7R5H8GR00000058JRZ41BM5",
+                    "source": "grow-sdk-verify",
+                    "transport": "udp-none",
+                    "message": "growsdk179503370112643 udp-none #0",
+                    "gl2_source_input": "6afe0a5707ba3acebff188d4",
+                    "gl2_processing_timestamp": "2026-11-18 20:28:23.006",
+                    "marker": "growsdk179503370112643",
+                    "bool_attr": "true",
+                    "gl2_source_node": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+                    "_id": "99c65850-e38e-11f1-8dde-020650dd320d",
+                    "seq": 0,
+                    "gl2_processing_duration_ms": 40,
+                    "timestamp": "2026-11-18T20:28:22.936Z"
+                  },
+                  "index": "graylog_0",
+                  "decoration_stats": null
+                }
+              ],
+              "effective_timerange": {
+                "from": "2026-11-18T20:23:23.861Z",
+                "to": "2026-11-18T20:28:23.861Z",
+                "type": "absolute"
+              },
+              "total_results": 13,
+              "type": "messages"
+            }
+          },
+          "errors": [],
+          "state": "COMPLETED"
+        }
+      },
+      "progress": 0,
+      "id": "6afe0a6707ba3acebff18984",
+      "search_id": "6afe0a6707ba3acebff18982",
+      "owner": "admin",
+      "executing_node": "6d14d009-e915-4e0f-b29a-42607f6ee195"
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "function": "listStreams",
+  "case": "ok",
+  "request": {
+    "method": "GET",
+    "path": "/api/streams/paginated?page=1&per_page=50&sort=title&order=asc",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Basic <redacted>"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "query": "",
+      "pagination": {
+        "total": 3,
+        "count": 3,
+        "page": 1,
+        "per_page": 50
+      },
+      "total": 3,
+      "sort": "title",
+      "order": "asc",
+      "elements": [
+        {
+          "id": "000000000000000000000002",
+          "creator_user_id": "admin",
+          "outputs": [],
+          "matching_type": "AND",
+          "description": "Stream containing all events created",
+          "created_at": "2026-11-18T20:27:59.563Z",
+          "rules": [],
+          "disabled": false,
+          "title": "All events",
+          "content_pack": null,
+          "is_default": false,
+          "remove_matches_from_default_stream": true,
+          "index_set_id": "6afe0a4f07ba3acebff1881b",
+          "is_editable": false,
+          "categories": []
+        },
+        {
+          "id": "000000000000000000000003",
+          "creator_user_id": "admin",
+          "outputs": [],
+          "matching_type": "AND",
+          "description": "Stream containing all system events created",
+          "created_at": "2026-11-18T20:27:59.572Z",
+          "rules": [],
+          "disabled": false,
+          "title": "All system events",
+          "content_pack": null,
+          "is_default": false,
+          "remove_matches_from_default_stream": true,
+          "index_set_id": "6afe0a4f07ba3acebff1881e",
+          "is_editable": false,
+          "categories": []
+        },
+        {
+          "id": "000000000000000000000001",
+          "creator_user_id": "local:admin",
+          "outputs": [],
+          "matching_type": "AND",
+          "description": "Contains messages that are not explicitly routed to other streams",
+          "created_at": "2026-11-18T20:27:57.443Z",
+          "rules": [],
+          "disabled": false,
+          "title": "Default Stream",
+          "content_pack": null,
+          "is_default": true,
+          "remove_matches_from_default_stream": false,
+          "index_set_id": "6afe0a4d07ba3acebff18718",
+          "is_editable": true,
+          "categories": []
+        }
+      ],
+      "attributes": [
+        {
+          "id": "_id",
+          "title": "id",
+          "type": "OBJECT_ID",
+          "sortable": true,
+          "searchable": true,
+          "hidden": true
+        },
+        {
+          "id": "title",
+          "title": "Title",
+          "type": "STRING",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "id": "description",
+          "title": "Description",
+          "type": "STRING",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "id": "created_at",
+          "title": "Created",
+          "type": "DATE",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "id": "index_set_id",
+          "title": "Index set",
+          "type": "STRING",
+          "sortable": true,
+          "filterable": true,
+          "hidden": true,
+          "related_collection": "index_sets"
+        },
+        {
+          "id": "disabled",
+          "title": "Status",
+          "type": "BOOLEAN",
+          "sortable": true,
+          "filterable": true,
+          "filter_options": [
+            {
+              "value": "true",
+              "title": "Paused"
+            },
+            {
+              "value": "false",
+              "title": "Running"
+            }
+          ]
+        }
+      ],
+      "defaults": {
+        "sort": {
+          "id": "title",
+          "direction": "ASC"
+        }
+      }
+    }
+  }
+}

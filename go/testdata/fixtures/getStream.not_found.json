@@ -1,0 +1,23 @@
+{
+  "function": "getStream",
+  "case": "not_found",
+  "request": {
+    "method": "GET",
+    "path": "/api/streams/000000000000000000000fff",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Basic <redacted>"
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "type": "ApiError",
+      "message": "Stream <000000000000000000000fff> not found!"
+    }
+  }
+}

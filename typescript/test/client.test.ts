@@ -2,15 +2,20 @@ import { inspect } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   ConfigError,
+  DEFAULT_REQUESTED_BY,
+  GraylogClient,
+  GraylogConfig,
+  GraylogError,
   PACKAGE_KEY,
   REDACTED,
   RetryPolicy,
   Secret,
   VENDOR_ENV,
-  GraylogClient,
-  GraylogConfig,
-  GraylogError,
+  bareHost,
+  parseGelfProtocol,
+  urlHost,
 } from "../src/index.js";
+import { clientFor, fixture, startGraylog } from "./helpers/graylog.js";
 import { type MockServer, closedPort, startServer } from "./helpers/server.js";
 
 const servers: MockServer[] = [];
@@ -18,227 +23,350 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((s) => s.close()));
 });
 
-async function demoServer(token = "t0ken-value"): Promise<MockServer> {
-  const s = await startServer((req) => {
-    if (req.url === "/health") return { status: 200, body: { status: "ok", version: "1.2.3" } };
-    if (req.url === "/version") return { status: 200, body: { version: "1.2.3" } };
-    if (req.url === "/v1/ping") {
-      return req.headers.authorization === `Bearer ${token}`
-        ? { status: 200, body: { pong: true } }
-        : { status: 401, body: { message: "bad token" } };
-    }
-    return { status: 404 };
-  });
+async function track(p: Promise<MockServer>): Promise<MockServer> {
+  const s = await p;
   servers.push(s);
   return s;
 }
 
-const fast = { retry: { maxRetries: 1, initialBackoffMs: 1 } };
+const basic = (u: string, p: string): string =>
+  `Basic ${Buffer.from(`${u}:${p}`).toString("base64")}`;
 
 describe("GraylogConfig", () => {
   it("uses defaults and freezes", () => {
     const c = new GraylogConfig();
-    expect(c.url).toBe(GraylogConfig.DEFAULT_URL);
+    expect(c.url).toBe("http://127.0.0.1:9000");
     expect(c.requestTimeoutMs).toBe(30_000);
     expect(c.retry).toBeInstanceOf(RetryPolicy);
-    expect(c.token).toBeUndefined();
+    expect(c.apiToken).toBeUndefined();
+    expect(c.gelfHost).toBe("127.0.0.1");
+    expect(c.gelfProtocol).toBe("tcp");
+    expect(c.gelfPort).toBeUndefined();
+    expect(c.gelfPortFor()).toBe(12201);
+    expect(c.gelfPortFor("udp")).toBe(12201);
+    expect(c.gelfPortFor("http")).toBe(12202);
+    expect(c.gelfHttpEndpoint()).toBe("http://127.0.0.1:12202/gelf");
+    expect(c.otlpGrpcEndpoint()).toBe("http://127.0.0.1:4317");
+    expect(c.gelfTls).toBe(false);
+    expect(c.requestedBy).toBe(DEFAULT_REQUESTED_BY);
+    expect(c.authorizationHeader()).toBeUndefined();
+    expect(c.knownSecrets()).toEqual([]);
     expect(Object.isFrozen(c)).toBe(true);
     expect(GraylogConfig.from(c)).toBe(c);
     expect(GraylogConfig.from().url).toBe(c.url);
-    const prefix = `GROW_${PACKAGE_KEY.toUpperCase().replaceAll("-", "_")}_`;
-    expect(GraylogConfig.ENV_PREFIX).toBe(prefix);
+    expect(GraylogConfig.ENV_PREFIX).toBe(`GROW_${PACKAGE_KEY.toUpperCase()}_`);
   });
 
-  it("keeps optional settings", () => {
+  it("keeps explicit settings and derives GELF endpoints", () => {
     const hooks = {};
     const logger = { debug() {}, info() {}, warn() {}, error() {} };
     const c = new GraylogConfig({
+      url: "https://graylog.example:9443",
       proxy: "http://p:1",
       userAgentSuffix: "s",
       hooks,
       logger,
-      token: new Secret("abcd"),
+      apiToken: new Secret("abcd-token"),
+      gelfPort: 5555,
+      gelfProtocol: "http",
+      gelfTls: true,
+      requestedBy: "me",
     });
+    expect(c.gelfHost).toBe("graylog.example");
+    expect(c.gelfPortFor("udp")).toBe(5555);
+    expect(c.gelfHttpEndpoint()).toBe("https://graylog.example:5555/gelf");
     expect(c.proxy).toBe("http://p:1");
     expect(c.userAgentSuffix).toBe("s");
     expect(c.hooks).toBe(hooks);
     expect(c.logger).toBe(logger);
-    expect(c.knownSecrets()).toEqual(["abcd"]);
-  });
-
-  it("validate() raises ConfigError", () => {
-    expect(() => new GraylogConfig({ url: "ftp://x" })).toThrow(ConfigError);
-    expect(() => new GraylogConfig({ token: "   " })).toThrow(ConfigError);
-  });
-
-  it("core.redaction.config: toString/JSON/inspect hide credentials", () => {
-    const c = new GraylogConfig({
-      token: "super-secret-tok",
-      headers: { "x-api-key": "hdr-secret" },
+    expect(c.requestedBy).toBe("me");
+    const explicit = new GraylogConfig({
+      gelfHost: "[::1]",
+      gelfHttpUrl: "http://in:1/gelf",
+      otlpEndpoint: "http://otel:4317",
     });
-    for (const form of [String(c), JSON.stringify(c), inspect(c), `${c.token}`]) {
-      expect(form).not.toContain("super-secret-tok");
-      expect(form).not.toContain("hdr-secret");
-    }
-    expect(String(c)).toContain(REDACTED);
-    expect(String(c)).toMatch(/Config\(/);
-    expect(new GraylogConfig().toJSON().token).toBeNull();
+    expect(explicit.gelfHost).toBe("::1");
+    expect(explicit.gelfHttpEndpoint()).toBe("http://in:1/gelf");
+    expect(explicit.otlpGrpcEndpoint()).toBe("http://otel:4317");
+    expect(new GraylogConfig({ gelfHost: "::1" }).otlpGrpcEndpoint()).toBe("http://[::1]:4317");
   });
 
-  it("core.config.env-precedence: explicit > GROW_* > vendor > default", () => {
-    const prefix = GraylogConfig.ENV_PREFIX;
-    const vendor = VENDOR_ENV as { url: string[]; token: string[] };
-    const saved = { url: vendor.url, token: vendor.token };
-    vendor.url = ["VENDOR_ADDR"];
-    vendor.token = ["VENDOR_TOKEN"];
-    try {
-      const env = {
-        [`${prefix}URL`]: "http://grow:1",
-        VENDOR_ADDR: "http://vendor:2",
-        VENDOR_TOKEN: "vendor-token",
-        [`${prefix}REQUEST_TIMEOUT`]: "5s",
-        [`${prefix}MAX_RETRIES`]: "7",
-      };
-      const fromEnv = GraylogConfig.fromEnv({}, env);
-      expect(fromEnv.url).toBe("http://grow:1");
-      expect(fromEnv.token?.reveal()).toBe("vendor-token");
-      expect(fromEnv.requestTimeoutMs).toBe(5000);
-      expect(fromEnv.retry.maxRetries).toBe(7);
-      expect(fromEnv.connectTimeoutMs).toBe(10_000);
+  it("builds Basic auth: token wins over user/password", () => {
+    const token = new GraylogConfig({ apiToken: "tok-1234", username: "u", password: "pw-12345" });
+    expect(token.authorizationHeader()).toBe(basic("tok-1234", "token"));
+    expect(token.knownSecrets()).toEqual(
+      expect.arrayContaining(["tok-1234", "pw-12345", basic("tok-1234", "token").slice(6)]),
+    );
+    const pw = new GraylogConfig({ username: "admin", password: "pw-12345" });
+    expect(pw.authorizationHeader()).toBe(basic("admin", "pw-12345"));
+    expect(pw.knownSecrets()).toContain(basic("admin", "pw-12345").slice(6));
+  });
 
-      const vendorOnly = GraylogConfig.fromEnv({}, { VENDOR_ADDR: "http://vendor:2" });
-      expect(vendorOnly.url).toBe("http://vendor:2");
-
-      const explicit = GraylogConfig.fromEnv(
-        { url: "http://explicit:3", token: "explicit-token", retry: { initialBackoffMs: 1 } },
-        env,
-      );
-      expect(explicit.url).toBe("http://explicit:3");
-      expect(explicit.token?.reveal()).toBe("explicit-token");
-      expect(explicit.retry.maxRetries).toBe(7);
-      expect(explicit.retry.initialBackoffMs).toBe(1);
-
-      expect(GraylogConfig.fromEnv({}, {}).url).toBe(GraylogConfig.DEFAULT_URL);
-      expect(GraylogConfig.fromEnv().url).toBeTypeOf("string");
-
-      let err: unknown;
-      try {
-        GraylogConfig.fromEnv({}, { [`${prefix}TOTAL_TIMEOUT`]: "forever-and-secret" });
-      } catch (e) {
-        err = e;
-      }
-      expect(err).toBeInstanceOf(ConfigError);
-      expect((err as Error).message).toContain(`${prefix}TOTAL_TIMEOUT`);
-      expect((err as Error).message).not.toContain("forever-and-secret");
-    } finally {
-      vendor.url = saved.url;
-      vendor.token = saved.token;
+  it("redacts credentials in toString, JSON and inspect", () => {
+    const c = new GraylogConfig({
+      apiToken: "super-secret-token",
+      username: "admin",
+      password: "super-secret-pw",
+      gelfHttpUrl: "http://u:pass@in:1/gelf?token=abc",
+      otlpEndpoint: "http://otel:4317",
+    });
+    for (const text of [c.toString(), JSON.stringify(c), inspect(c)]) {
+      expect(text).not.toContain("super-secret");
+      expect(text).toContain(REDACTED);
+      expect(text).toContain("admin");
     }
+    expect(JSON.stringify(new GraylogConfig())).toContain('"apiToken":null');
+  });
+
+  it("validates", () => {
+    const bad: [Record<string, unknown>, string][] = [
+      [{ apiToken: "  " }, "apiToken must not be blank"],
+      [{ username: "u" }, "username and password"],
+      [{ password: "p" }, "username and password"],
+      [{ gelfPort: 0 }, "gelfPort"],
+      [{ gelfPort: 1.5 }, "gelfPort"],
+      [{ gelfProtocol: "smtp" }, "gelfProtocol"],
+      [{ gelfHttpUrl: "ftp://x" }, "gelfHttpUrl"],
+      [{ gelfHttpUrl: "::" }, "gelfHttpUrl"],
+      [{ otlpEndpoint: "grpc://x" }, "otlpEndpoint"],
+      [{ requestedBy: " " }, "requestedBy"],
+      [{ url: "nope" }, "url"],
+    ];
+    for (const [options, message] of bad) {
+      expect(() => new GraylogConfig(options), message).toThrow(ConfigError);
+      expect(() => new GraylogConfig(options)).toThrow(message);
+    }
+  });
+
+  it("with() copies and overrides", () => {
+    const c = new GraylogConfig({
+      apiToken: "t-1234",
+      username: "u",
+      password: "p",
+      gelfPort: 1,
+      gelfHttpUrl: "http://a/gelf",
+      otlpEndpoint: "http://o:1",
+      proxy: "http://p:1",
+      userAgentSuffix: "x",
+      hooks: {},
+      logger: { debug() {}, info() {}, warn() {}, error() {} },
+    });
+    const d = c.with({ gelfProtocol: "udp" });
+    expect(d.gelfProtocol).toBe("udp");
+    expect(d.apiToken?.reveal()).toBe("t-1234");
+    expect(d.gelfHttpUrl).toBe("http://a/gelf");
+    expect(new GraylogConfig().with({ url: "http://x:1" }).gelfHost).toBe("127.0.0.1");
+  });
+
+  it("fromEnv: GROW_ > vendor > platform aliases > defaults; overrides win", () => {
+    const env = {
+      GRAYLOG_URL: "http://vendor:9000",
+      GRAYLOG_API_TOKEN: "vendor-token",
+      GRAYLOG_USER: "admin",
+      GRAYLOG_PASSWORD: "vendor-pw",
+      GRAYLOG_HOST: "platform-host",
+      GRAYLOG_PORT: "1111",
+      GRAYLOG_TRANSPORT: "UDP",
+      GRAYLOG_GELF_HTTP_URL: "http://vendor:12202/gelf",
+      GRAYLOG_OTLP_GRPC_ENDPOINT: "http://vendor:4317",
+      GROW_GRAYLOG_GELF_TLS: "yes",
+    };
+    const c = GraylogConfig.fromEnv({}, env);
+    expect(c.url).toBe("http://vendor:9000");
+    expect(c.apiToken?.reveal()).toBe("vendor-token");
+    expect(c.username).toBe("admin");
+    expect(c.password?.reveal()).toBe("vendor-pw");
+    expect(c.gelfHost).toBe("platform-host");
+    expect(c.gelfPort).toBe(1111);
+    expect(c.gelfProtocol).toBe("udp");
+    expect(c.gelfHttpUrl).toBe("http://vendor:12202/gelf");
+    expect(c.otlpEndpoint).toBe("http://vendor:4317");
+    expect(c.gelfTls).toBe(true);
+
+    const layered = GraylogConfig.fromEnv(
+      { gelfPort: 3333 },
+      {
+        ...env,
+        GRAYLOG_GELF_HOST: "vendor-gelf",
+        GRAYLOG_GELF_PORT: "2222",
+        GRAYLOG_GELF_PROTOCOL: "http",
+        GROW_GRAYLOG_URL: "http://grow:9000",
+        GROW_GRAYLOG_API_TOKEN: "grow-token",
+        GROW_GRAYLOG_GELF_PROTOCOL: "tcp",
+        GROW_GRAYLOG_OTLP_ENDPOINT: "http://grow:4317",
+        GROW_GRAYLOG_GELF_HTTP_URL: "http://grow/gelf",
+        GROW_GRAYLOG_USER: "grow-user",
+        GROW_GRAYLOG_PASSWORD: "grow-pw",
+        GROW_GRAYLOG_GELF_HOST: "grow-gelf",
+      },
+    );
+    expect(layered.url).toBe("http://grow:9000");
+    expect(layered.apiToken?.reveal()).toBe("grow-token");
+    expect(layered.gelfHost).toBe("grow-gelf");
+    expect(layered.gelfPort).toBe(3333);
+    expect(layered.gelfProtocol).toBe("tcp");
+    expect(layered.otlpEndpoint).toBe("http://grow:4317");
+    expect(layered.username).toBe("grow-user");
+
+    expect(GraylogConfig.fromEnv({}, { GRAYLOG_GELF_PORT: "2222" }).gelfPort).toBe(2222);
+    expect(GraylogConfig.fromEnv({}, {}).url).toBe(GraylogConfig.DEFAULT_URL);
+    expect(VENDOR_ENV.gelfProtocol).toEqual(["GRAYLOG_GELF_PROTOCOL", "GRAYLOG_TRANSPORT"]);
+  });
+
+  it("fromEnv names the bad variable but never its value", () => {
+    expect(() => GraylogConfig.fromEnv({}, { GRAYLOG_TRANSPORT: "carrier-pigeon" })).toThrow(
+      /GRAYLOG_TRANSPORT: expected udp, tcp or http/,
+    );
+    try {
+      GraylogConfig.fromEnv({}, { GROW_GRAYLOG_GELF_PORT: "abc" });
+    } catch (err) {
+      expect((err as Error).message).toContain("GROW_GRAYLOG_GELF_PORT");
+      expect((err as Error).message).not.toContain("abc");
+    }
+  });
+
+  it("helpers", () => {
+    expect(parseGelfProtocol(" HTTP ")).toBe("http");
+    expect(parseGelfProtocol("x")).toBeUndefined();
+    expect(bareHost("[::1]")).toBe("::1");
+    expect(bareHost("h")).toBe("h");
+    expect(urlHost("::1")).toBe("[::1]");
+    expect(urlHost("[::1]")).toBe("[::1]");
+    expect(urlHost("h")).toBe("h");
   });
 });
 
-describe("GraylogClient", () => {
-  it("health, ping and serverVersion against the demo API", async () => {
-    const s = await demoServer();
-    const client = new GraylogClient({ url: s.url, token: "t0ken-value", ...fast });
+describe("GraylogClient surface", () => {
+  it("health: ALIVE → ok, sends Accept text/plain", async () => {
+    const s = await track(startGraylog({ "GET /api/system/lbstatus": fixture("health.ok") }));
+    const client = clientFor(s);
     expect(await client.health()).toEqual({
       healthy: true,
       status: "ok",
-      details: { version: "1.2.3" },
+      details: { lb_status: "ALIVE" },
     });
-    expect(await client.ping()).toBeGreaterThanOrEqual(0);
-    expect(await client.serverVersion()).toBe("1.2.3");
-    expect(client.transport.userAgent).toContain(`grow-codes-${PACKAGE_KEY}/`);
+    expect(s.requests[0]?.headers.accept).toBe("text/plain");
     await client.close();
   });
 
-  it("ping with a bad token raises AuthenticationError without leaking it", async () => {
-    const s = await demoServer();
-    const client = new GraylogClient(
-      new GraylogConfig({ url: s.url, token: "wrong-token-xyz", ...fast }),
-    );
-    const err = await client.ping().catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(GraylogError);
-    expect((err as GraylogError).code).toBe("AUTHENTICATION");
-    expect((err as Error).message).not.toContain("wrong-token-xyz");
-    await client.close();
-  });
-
-  it("serverVersion raises UnsupportedError when absent", async () => {
-    const s = await startServer([{ status: 404 }]);
-    servers.push(s);
-    const client = new GraylogClient({ url: s.url, ...fast });
-    await expect(client.serverVersion()).rejects.toMatchObject({ code: "UNSUPPORTED" });
-    const s2 = await startServer([{ status: 200, body: { other: 1 } }]);
-    servers.push(s2);
-    const client2 = new GraylogClient({ url: s2.url, ...fast });
-    await expect(client2.serverVersion()).rejects.toMatchObject({ code: "UNSUPPORTED" });
-    await client.close();
-    await client2.close();
-  });
-
-  it("health reports vendor words and unhealthy statuses", async () => {
-    const s = await startServer((req) =>
-      req.url === "/health"
-        ? { status: 200, body: { status: "degraded" } }
-        : { status: 200, body: "" },
-    );
-    servers.push(s);
-    const degraded = new GraylogClient({ url: s.url, ...fast });
-    expect(await degraded.health()).toMatchObject({ healthy: false, status: "degraded" });
-    await degraded.close();
-    const empty = await startServer([{ status: 200 }]);
-    servers.push(empty);
-    const ok = new GraylogClient({ url: empty.url, ...fast });
-    expect(await ok.health()).toMatchObject({ healthy: true, status: "ok" });
-    await ok.close();
-    const down = await startServer([{ status: 500 }]);
-    servers.push(down);
-    const sick = new GraylogClient({ url: down.url, ...fast });
-    expect(await sick.health()).toMatchObject({ healthy: false, status: "unhealthy" });
-    await sick.close();
-  });
-
-  it("core.health.unreachable: closed port -> healthy=false, status=unreachable", async () => {
-    const port = await closedPort();
-    const client = new GraylogClient({ url: `http://127.0.0.1:${port}`, ...fast });
-    expect(await client.health()).toEqual({
+  it("health: THROTTLED → degraded, DEAD → unhealthy, other words, errors, unreachable", async () => {
+    const answers = [
+      { status: 429, body: "THROTTLED" },
+      { status: 503, body: "DEAD" },
+      { status: 200, body: "STARTING" },
+      { status: 500, body: "<html>oops</html>", headers: { "content-type": "text/html" } },
+    ];
+    const s = await track(startServer((_r, i) => answers[i] ?? { status: 404 }));
+    const client = clientFor(s, { retry: { maxRetries: 0 } });
+    expect(await client.health()).toMatchObject({ healthy: false, status: "degraded" });
+    expect(await client.health()).toMatchObject({
       healthy: false,
-      status: "unreachable",
-      details: { error: "UNAVAILABLE" },
+      status: "unhealthy",
+      details: { lb_status: "DEAD" },
     });
-    await client.close();
+    expect(await client.health()).toMatchObject({
+      healthy: false,
+      details: { lb_status: "STARTING" },
+    });
+    expect(await client.health()).toMatchObject({
+      healthy: false,
+      status: "unhealthy",
+      details: { httpStatus: "500" },
+    });
+    const down = new GraylogClient({
+      url: `http://127.0.0.1:${await closedPort()}`,
+      retry: { maxRetries: 0 },
+    });
+    expect(await down.health()).toMatchObject({ healthy: false, status: "unreachable" });
+    const ac = new AbortController();
+    ac.abort();
+    await expect(client.health({ signal: ac.signal })).rejects.toMatchObject({ code: "CANCELLED" });
   });
 
-  it("health rethrows cancellation", async () => {
-    const s = await demoServer();
-    const client = new GraylogClient({ url: s.url });
-    await expect(client.health({ signal: AbortSignal.abort() })).rejects.toMatchObject({
-      code: "CANCELLED",
+  it("ping, serverVersion, systemInfo with auth + X-Requested-By + User-Agent", async () => {
+    const s = await track(startGraylog({ "GET /api/system": fixture("ping.ok_token") }));
+    const client = clientFor(s);
+    expect(await client.ping()).toBeGreaterThanOrEqual(0);
+    expect(await client.serverVersion()).toBe("7.0.16+58e0f6e");
+    const info = await client.systemInfo();
+    expect(info).toMatchObject({
+      facility: "graylog-server",
+      codename: "Noir",
+      version: "7.0.16+58e0f6e",
+      lbStatus: "alive",
+      timezone: "Etc/UTC",
+      isLeader: true,
+      isProcessing: true,
     });
-    await client.close();
-  });
-
-  it("core.close.idempotent: close twice is safe", async () => {
-    const s = await demoServer();
-    const client = new GraylogClient({ url: s.url });
-    await client.health();
+    expect(info.startedAt).toEqual(new Date("2026-11-18T20:27:42.909Z"));
+    const req = s.requests[0];
+    expect(req?.headers.authorization).toBe(basic("test-api-token-value", "token"));
+    expect(req?.headers["x-requested-by"]).toBe(DEFAULT_REQUESTED_BY);
+    expect(req?.headers["user-agent"]).toMatch(
+      /^grow-codes-graylog\/\d+\.\d+\.\d+ \(typescript\)$/,
+    );
     await client.close();
     await client.close();
     await expect(client.ping()).rejects.toMatchObject({ code: "CONFIG" });
   });
 
-  it("fromEnv builds from GROW_* variables", async () => {
-    const s = await demoServer();
-    const key = `${GraylogConfig.ENV_PREFIX}URL`;
-    process.env[key] = s.url;
+  it("serverVersion: UNSUPPORTED when no version is reported", async () => {
+    const s = await track(startGraylog({ "GET /api/system": { status: 200, body: {} } }));
+    await expect(clientFor(s).serverVersion()).rejects.toMatchObject({ code: "UNSUPPORTED" });
+  });
+
+  it("maps 401 (empty body) to AUTHENTICATION without leaking the token", async () => {
+    const s = await track(startGraylog({ "GET /api/system": fixture("ping.unauthorized") }));
+    const client = clientFor(s, { apiToken: "leaky-token-1234" });
+    const err = await client.ping().catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(GraylogError);
+    expect(err).toMatchObject({ code: "AUTHENTICATION", httpStatus: 401, retryable: false });
+    expect((err as Error).message).not.toContain("leaky-token-1234");
+  });
+
+  it("maps HTML 500 to UNAVAILABLE and JSON 404 ApiError to NOT_FOUND with the vendor message", async () => {
+    const s = await track(
+      startGraylog({
+        "GET /api/system": {
+          status: 500,
+          headers: { "content-type": "text/html" },
+          body: "<html><body>MongoTimeoutException</body></html>",
+        },
+        "GET /api/system/inputs/x": fixture("getInput.not_found"),
+      }),
+    );
+    const client = clientFor(s, { retry: { maxRetries: 0 } });
+    const err = (await client.systemInfo().catch((e: unknown) => e)) as GraylogError;
+    expect(err.code).toBe("UNAVAILABLE");
+    expect(err.message).not.toContain("<html>");
+    const nf = (await client.getInput("x").catch((e: unknown) => e)) as GraylogError;
+    expect(nf.code).toBe("NOT_FOUND");
+    expect(nf.message).toMatch(/not found! \(HTTP 404\)$/);
+  });
+
+  it("rejects non-object JSON responses", async () => {
+    const s = await track(
+      startGraylog({
+        "GET /api/system": {
+          status: 200,
+          body: "[1]",
+          headers: { "content-type": "application/json" },
+        },
+      }),
+    );
+    await expect(clientFor(s).systemInfo()).rejects.toMatchObject({ code: "UNAVAILABLE" });
+  });
+
+  it("fromEnv builds a client", async () => {
+    const saved = { ...process.env };
+    process.env.GROW_GRAYLOG_URL = "http://env-host:9000";
     try {
-      const client = GraylogClient.fromEnv({ token: "t0ken-value" });
-      expect(client.config.url).toBe(s.url);
-      expect(await client.ping()).toBeGreaterThanOrEqual(0);
-      await client.close();
+      const c = GraylogClient.fromEnv({ apiToken: "x-1234" });
+      expect(c.config.url).toBe("http://env-host:9000");
+      expect(c.transport.userAgent).toContain("grow-codes-graylog/");
+      await c.close();
     } finally {
-      delete process.env[key];
+      process.env = saved;
     }
   });
 });

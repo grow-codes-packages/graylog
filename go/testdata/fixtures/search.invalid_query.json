@@ -1,0 +1,132 @@
+{
+  "function": "search",
+  "case": "invalid_query",
+  "request": {
+    "method": "POST",
+    "path": "/api/views/search/sync",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Authorization": "Basic <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "queries": [
+        {
+          "id": "q1",
+          "query": {
+            "type": "elasticsearch",
+            "query_string": "marker:(("
+          },
+          "timerange": {
+            "type": "absolute",
+            "from": "2026-11-18T20:28:15.935Z",
+            "to": "2026-11-18T20:28:24.794Z"
+          },
+          "search_types": [
+            {
+              "id": "st1",
+              "type": "messages",
+              "limit": 10,
+              "offset": 0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "execution": {
+        "done": true,
+        "cancelled": false,
+        "completed_exceptionally": true
+      },
+      "results": {
+        "q1": {
+          "query": {
+            "id": "q1",
+            "timerange": {
+              "from": "2026-11-18T20:28:15.935Z",
+              "to": "2026-11-18T20:28:24.794Z",
+              "type": "absolute"
+            },
+            "filter": {
+              "type": "or",
+              "filters": [
+                {
+                  "type": "stream",
+                  "id": "6afe0a6607ba3acebff1894e"
+                },
+                {
+                  "type": "stream",
+                  "id": "000000000000000000000001"
+                }
+              ]
+            },
+            "filters": [],
+            "query": {
+              "type": "elasticsearch",
+              "query_string": "marker:(("
+            },
+            "search_types": [
+              {
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "stream_categories": [],
+                "type": "messages",
+                "id": "st1",
+                "name": null,
+                "limit": 10,
+                "offset": 0,
+                "sort": null,
+                "fields": [],
+                "decorators": [],
+                "filter": null,
+                "filters": []
+              }
+            ]
+          },
+          "execution_stats": {
+            "duration": 11,
+            "timestamp": "2026-11-18T20:28:24.172Z",
+            "effective_timerange": {
+              "from": "2026-11-18T20:28:15.935Z",
+              "to": "2026-11-18T20:28:24.794Z",
+              "type": "absolute"
+            }
+          },
+          "search_types": {},
+          "errors": [
+            {
+              "type": "search_type",
+              "description": "OpenSearch exception [type=search_phase_execution_exception, reason=all shards failed].",
+              "search_type_id": "st1",
+              "query_id": "q1"
+            }
+          ],
+          "state": "COMPLETED"
+        }
+      },
+      "errors": [
+        {
+          "type": "search_type",
+          "description": "OpenSearch exception [type=search_phase_execution_exception, reason=all shards failed].",
+          "search_type_id": "st1",
+          "query_id": "q1"
+        }
+      ],
+      "progress": 0,
+      "id": "6afe0a6807ba3acebff1899c",
+      "search_id": "6afe0a6807ba3acebff1899a",
+      "owner": "admin",
+      "executing_node": "6d14d009-e915-4e0f-b29a-42607f6ee195"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "function": "gelfHttp",
+  "case": "bulk_gzip_accepted",
+  "request": {
+    "method": "POST",
+    "path": "/gelf",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Content-Type": "application/json",
+      "Content-Encoding": "gzip"
+    }
+  },
+  "response": {
+    "status": 202,
+    "headers": {},
+    "body": null
+  }
+}

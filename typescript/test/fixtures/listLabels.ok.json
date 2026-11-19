@@ -1,0 +1,68 @@
+{
+  "function": "listLabels",
+  "case": "ok",
+  "request": {
+    "method": "GET",
+    "path": "/api/system/fields",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Basic <redacted>"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "fields": [
+        "gl2_receive_timestamp",
+        "timestamp_processing",
+        "scores",
+        "gl2_remote_ip",
+        "gl2_remote_port",
+        "source",
+        "source_streams",
+        "gl2_source_input",
+        "triggered_jobs",
+        "associated_assets",
+        "group_by_fields",
+        "gl2_processing_timestamp",
+        "key_tuple",
+        "alert",
+        "t_arr",
+        "gl2_source_node",
+        "event_definition_id",
+        "id",
+        "gl2_processing_duration_ms",
+        "seq",
+        "key",
+        "timestamp",
+        "timerange_start",
+        "timerange_end",
+        "gl2_accounted_message_size",
+        "trace_id",
+        "t_obj",
+        "origin_context",
+        "level",
+        "span_id",
+        "streams",
+        "gl2_message_id",
+        "t_str",
+        "gl2_second_sort_field",
+        "t_int",
+        "transport",
+        "message",
+        "priority",
+        "t_float",
+        "full_message",
+        "marker",
+        "event_definition_type",
+        "bool_attr",
+        "fields",
+        "gl2_original_timestamp"
+      ]
+    }
+  }
+}

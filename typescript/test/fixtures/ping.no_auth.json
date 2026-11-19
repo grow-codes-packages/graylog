@@ -1,0 +1,19 @@
+{
+  "function": "ping",
+  "case": "no_auth",
+  "request": {
+    "method": "GET",
+    "path": "/api/system",
+    "headers": {
+      "Accept": "application/json"
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "www-authenticate": "Basic realm=\"Graylog Server\"",
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195"
+    },
+    "body": null
+  }
+}

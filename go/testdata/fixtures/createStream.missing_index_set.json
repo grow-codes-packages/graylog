@@ -1,0 +1,34 @@
+{
+  "function": "createStream",
+  "case": "missing_index_set",
+  "request": {
+    "method": "POST",
+    "path": "/api/streams",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Authorization": "Basic <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "entity": {
+        "title": "bad"
+      }
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "type": "RequestError",
+      "message": "Error at \"entity\" [1, 27]: Null indexSetId",
+      "line": 1,
+      "column": 27,
+      "path": "entity",
+      "reference_path": "org.graylog.security.shares.CreateEntityRequest[\"entity\"]->org.graylog2.rest.resources.streams.requests.CreateStreamRequest"
+    }
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "function": "listInputs",
+  "case": "ok",
+  "request": {
+    "method": "GET",
+    "path": "/api/system/inputs",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Basic <redacted>"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "inputs": [
+        {
+          "title": "grow-sdk OTLP gRPC",
+          "global": true,
+          "name": "OpenTelemetry (gRPC)",
+          "content_pack": null,
+          "id": "6afe0a5a07ba3acebff188ef",
+          "created_at": "2026-11-18T20:28:10.083Z",
+          "type": "org.graylog.inputs.otel.OTelGrpcInput",
+          "creator_user_id": "admin",
+          "attributes": {
+            "max_inbound_msg_size": 4194304,
+            "bearer_token": {
+              "is_set": false
+            },
+            "tls_key": {
+              "is_set": false
+            },
+            "port": 4317,
+            "throttling_allowed": false,
+            "insecure": true,
+            "bind_address": "0.0.0.0"
+          },
+          "static_fields": {},
+          "node": null
+        },
+        {
+          "title": "grow-sdk GELF UDP",
+          "global": true,
+          "name": "GELF UDP",
+          "content_pack": null,
+          "id": "6afe0a5707ba3acebff188d4",
+          "created_at": "2026-11-18T20:28:07.742Z",
+          "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput",
+          "creator_user_id": "admin",
+          "attributes": {
+            "recv_buffer_size": 262144,
+            "bind_address": "0.0.0.0",
+            "port": 12201,
+            "decompress_size_limit": 8388608,
+            "number_worker_threads": 2
+          },
+          "static_fields": {},
+          "node": null
+        },
+        {
+          "title": "grow-sdk GELF TCP",
+          "global": true,
+          "name": "GELF TCP",
+          "content_pack": null,
+          "id": "6afe0a5807ba3acebff188dd",
+          "created_at": "2026-11-18T20:28:08.957Z",
+          "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
+          "creator_user_id": "admin",
+          "attributes": {
+            "recv_buffer_size": 1048576,
+            "port": 12201,
+            "tls_enable": false,
+            "tcp_keepalive": false,
+            "use_null_delimiter": true,
+            "tls_key_password": {
+              "is_set": false
+            },
+            "number_worker_threads": 2,
+            "max_message_size": 2097152,
+            "bind_address": "0.0.0.0",
+            "decompress_size_limit": 8388608
+          },
+          "static_fields": {},
+          "node": null
+        },
+        {
+          "title": "grow-sdk GELF HTTP",
+          "global": true,
+          "name": "GELF HTTP",
+          "content_pack": null,
+          "id": "6afe0a5a07ba3acebff188e6",
+          "created_at": "2026-11-18T20:28:10.020Z",
+          "type": "org.graylog2.inputs.gelf.http.GELFHttpInput",
+          "creator_user_id": "admin",
+          "attributes": {
+            "idle_writer_timeout": 60,
+            "recv_buffer_size": 1048576,
+            "max_chunk_size": 8388608,
+            "tcp_keepalive": false,
+            "number_worker_threads": 2,
+            "enable_cors": true,
+            "bind_address": "0.0.0.0",
+            "decompress_size_limit": 8388608,
+            "port": 12202,
+            "tls_enable": false,
+            "tls_key_password": {
+              "is_set": false
+            },
+            "authorization_header_value": {
+              "is_set": false
+            },
+            "enable_bulk_receiving": true
+          },
+          "static_fields": {},
+          "node": null
+        }
+      ],
+      "total": 4
+    }
+  }
+}
