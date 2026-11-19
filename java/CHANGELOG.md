@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/grow-codes-packages/graylog/compare/java-v0.1.1...java-v0.1.2) (2026-11-19)
+
+
+### Dependencies
+
+* **java:** Bump the java group across 2 directories with 14 updates ([#13](https://github.com/grow-codes-packages/graylog/issues/13)) ([d2988f2](https://github.com/grow-codes-packages/graylog/commit/d2988f218e1aa0d2ec3a0c089b5be3a65cc5a19e))
+
 ## [0.1.1](https://github.com/grow-codes-packages/graylog/compare/java-v0.1.0...java-v0.1.1) (2026-11-19)
 
 

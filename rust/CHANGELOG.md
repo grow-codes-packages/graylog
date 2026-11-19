@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/grow-codes-packages/graylog/compare/rust-v0.1.1...rust-v0.1.2) (2026-11-19)
+
+
+### Dependencies
+
+* **rust:** Bump the rust group across 1 directory with 4 updates ([#5](https://github.com/grow-codes-packages/graylog/issues/5)) ([785fbe7](https://github.com/grow-codes-packages/graylog/commit/785fbe70cf3a2cfa4c7e4e949ae7201d8750cf2b))
+
 ## [0.1.1](https://github.com/grow-codes-packages/graylog/compare/rust-v0.1.0...rust-v0.1.1) (2026-11-19)
 
 
