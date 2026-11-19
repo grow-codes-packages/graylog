@@ -659,7 +659,7 @@ def test_log_client_factory_and_close() -> None:
         query = c.log_query_client(streams=["s1"])
         assert isinstance(query, sdk.GraylogLogQueryClient) and query.streams == ["s1"]
     c.close()
-    with pytest.raises(sdk.ConfigError):
+    with pytest.raises(sdk.CancelledError):
         c.log_client()
 
 
@@ -839,7 +839,7 @@ async def test_async_log_client_and_close() -> None:
     await c.aclose()
     await c.close()
     assert sent == [1, -1]
-    with pytest.raises(sdk.ConfigError):
+    with pytest.raises(sdk.CancelledError):
         c.log_client()
 
 

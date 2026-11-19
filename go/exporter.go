@@ -112,8 +112,12 @@ type LogOptions struct {
 
 // NewLogClient returns a batching LogClient that sends through GELF (udp,
 // tcp, http) or OTLP/gRPC (ProtocolOTLP, endpoint Config.OTLPGRPCEndpoint).
-// Close of the Client flushes and closes it.
+// Close of the Client flushes and closes it. A closed Client returns a
+// CANCELLED error.
 func (c *Client) NewLogClient(opts LogOptions) (*BatchingLogClient, error) {
+	if c.isClosed() {
+		return nil, &Error{Code: ErrorCodeCancelled, Message: "logClient: client is closed"}
+	}
 	protocol := opts.Protocol
 	if protocol == "" {
 		protocol = c.cfg.GelfProtocol
@@ -150,8 +154,12 @@ func (c *Client) NewLogClient(opts LogOptions) (*BatchingLogClient, error) {
 }
 
 // NewLogClientWithExporter returns a batching LogClient for any exporter.
-// Close of the Client flushes and closes it.
+// Close of the Client flushes and closes it. A closed Client returns a
+// CANCELLED error.
 func (c *Client) NewLogClientWithExporter(exporter LogExporter, opts LogClientOptions) (*BatchingLogClient, error) {
+	if c.isClosed() {
+		return nil, &Error{Code: ErrorCodeCancelled, Message: "logClient: client is closed"}
+	}
 	lc, err := NewBatchingLogClient(exporter, opts)
 	if err != nil {
 		return nil, err

@@ -200,8 +200,11 @@ impl GraylogClient {
 
     /// A batching `LogClient` that sends through GELF (`udp`, `tcp`, `http`) or OTLP/gRPC
     /// (`otlp`, endpoint `otlp_grpc_endpoint`). Closing the `GraylogClient` flushes and closes
-    /// it. Must be called inside a tokio runtime.
+    /// it. Must be called inside a tokio runtime. A closed client returns `CANCELLED`.
     pub fn new_log_client(&self, opts: LogOptions) -> Result<BatchingLogClient> {
+        if self.is_closed() {
+            return Err(Error::cancelled("logClient: client is closed"));
+        }
         let cfg = self.config();
         let protocol = opts.protocol.unwrap_or(cfg.gelf_protocol());
         let exporter: Arc<dyn LogExporter> = if protocol == GelfProtocol::Otlp {
@@ -229,12 +232,15 @@ impl GraylogClient {
     }
 
     /// A batching `LogClient` for any exporter (the transport fields of `opts` are ignored).
-    /// Closing the `GraylogClient` flushes and closes it.
+    /// Closing the `GraylogClient` flushes and closes it. A closed client returns `CANCELLED`.
     pub fn new_log_client_with_exporter(
         &self,
         exporter: Arc<dyn LogExporter>,
         opts: LogOptions,
     ) -> Result<BatchingLogClient> {
+        if self.is_closed() {
+            return Err(Error::cancelled("logClient: client is closed"));
+        }
         let client = BatchingLogClient::builder(exporter)
             .batch_options(opts.batch)
             .resource(opts.resource)

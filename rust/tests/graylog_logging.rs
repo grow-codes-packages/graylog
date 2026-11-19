@@ -112,6 +112,9 @@ async fn http_and_udp_log_clients() {
     assert_eq!(&buf[..2], &[0x1f, 0x8b]);
     assert!(n > 10);
     c.close().await;
+    // A closed client refuses new log clients with CANCELLED.
+    let err = c.new_log_client(LogOptions::default()).unwrap_err();
+    assert_eq!(err.code(), ErrorCode::Cancelled);
 }
 
 #[tokio::test]

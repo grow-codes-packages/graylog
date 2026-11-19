@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  CancelledError,
   DEFAULT_TAIL_INTERVAL_MS,
+  TAIL_OVERLAP_MS,
   GraylogLogQueryClient,
   Severity,
   type LogRecord,
@@ -338,14 +340,88 @@ describe("GraylogLogQueryClient", () => {
     const query = clientFor(s).logQueryClient();
     const spy = vi.spyOn(globalThis, "setTimeout");
     const handle = query.tail("x", () => undefined, { start: new Date(0) });
+    const until = Date.now() + 3000;
+    while (!spy.mock.calls.some((c) => c[1] === DEFAULT_TAIL_INTERVAL_MS) && Date.now() < until)
+      await new Promise((r) => setImmediate(r));
     expect(spy.mock.calls.some((c) => c[1] === DEFAULT_TAIL_INTERVAL_MS)).toBe(true);
+    handle.stop();
     handle.stop();
     const got: LogRecord[] = [];
     const fast = query.tail("x", (r) => got.push(r), { start: new Date(0), intervalMs: 10 });
+    const first = s.requests.length;
     const deadline = Date.now() + 3000;
-    while (got.length < 3 && Date.now() < deadline) await new Promise((r) => setTimeout(r, 10));
+    while (s.requests.length < first + 3 && Date.now() < deadline)
+      await new Promise((r) => setTimeout(r, 10));
     fast.stop();
     spy.mockRestore();
+    // the same three hits come back on every poll: delivered once each (dedupe by id)
     expect(got.length).toBe(3);
+    const q = queryOf(s.requests[s.requests.length - 1]);
+    expect(q.search_types[0]).toMatchObject({ limit: 1000, offset: 0 });
+    // after the first poll the window starts 10 s before the newest record seen
+    const newest = new Date("2026-11-18T20:28:22.938Z").getTime();
+    expect(new Date(q.timerange.from as string).getTime()).toBe(newest - TAIL_OVERLAP_MS);
+  });
+
+  it("tail pages, reports errors, survives failing callbacks and stops on close", async () => {
+    let calls = 0;
+    const page = loadFixture("search.absolute_sorted_fields").response.body as {
+      results: { q1: { search_types: { st1: { messages: unknown[]; total_results: number } } } };
+    };
+    const s = await graylog({
+      "POST /api/views/search/sync": (req) => {
+        calls++;
+        if (calls === 2) return { status: 500, body: { type: "ApiError", message: "boom" } };
+        const body = JSON.parse(JSON.stringify(page)) as typeof page;
+        const st = body.results.q1.search_types.st1;
+        const offset = (queryOf(req).search_types[0] as { offset: number }).offset;
+        st.total_results = 4;
+        st.messages = offset === 0 ? st.messages.slice(0, 2) : st.messages.slice(2);
+        if (offset !== 0) {
+          const extra = JSON.parse(JSON.stringify(st.messages[0])) as {
+            message: Record<string, unknown>;
+          };
+          extra.message._id = "";
+          st.messages.push(extra);
+        }
+        return { status: 200, body };
+      },
+    });
+    const client = clientFor(s, { retry: { maxRetries: 0 } });
+    const query = client.logQueryClient({ streams: ["s1"] });
+    const got: LogRecord[] = [];
+    const errors: unknown[] = [];
+    const handle = query.tail(
+      "x",
+      (r) => {
+        got.push(r);
+        throw new Error("callback failure");
+      },
+      { start: new Date(0), intervalMs: 5, onError: (e) => errors.push(e) },
+    );
+    const deadline = Date.now() + 3000;
+    while ((errors.length === 0 || got.length < 4) && Date.now() < deadline)
+      await new Promise((r) => setTimeout(r, 5));
+    expect(got.length).toBeGreaterThanOrEqual(4);
+    expect(errors.length).toBe(1);
+    expect(queryOf(s.requests[0]).filter?.filters[0]?.id).toBe("s1");
+    await client.close();
+    const after = s.requests.length;
+    await new Promise((r) => setTimeout(r, 40));
+    expect(s.requests.length).toBeLessThanOrEqual(after + 1);
+    handle.stop();
+    expect(() => query.tail("x", () => undefined)).toThrow(CancelledError);
+  });
+
+  it("a closed client fails every call with CANCELLED", async () => {
+    const s = await graylog({ "GET /api/system": fixture("ping.ok_token") });
+    const client = clientFor(s);
+    await client.close();
+    expect(client.closed).toBe(true);
+    await expect(client.ping()).rejects.toMatchObject({ code: "CANCELLED" });
+    await expect(client.health()).rejects.toBeInstanceOf(CancelledError);
+    await expect(client.listInputs()).rejects.toBeInstanceOf(CancelledError);
+    expect(() => client.logClient()).toThrow(CancelledError);
+    await client.close();
   });
 });

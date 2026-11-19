@@ -694,15 +694,6 @@ class GraylogClientTest {
     assertThat(custom.resource()).containsEntry("service.name", "svc");
     assertThat(c.logQueryClient(null).options().defaultWindow()).isEqualTo(Duration.ofHours(1));
     assertThat(c.logQueryClient().options().streams()).isEmpty();
-    c.close();
-    c.close();
-    assertThat(c.isClosed()).isTrue();
-    // registering after close closes immediately
-    AutoCloseable[] closedFlag = {null};
-    c.register(() -> closedFlag[0] = () -> {});
-    assertThat(closedFlag[0]).isNotNull();
-    assertThat(gelf).isNotNull();
-    assertThat(otlp).isNotNull();
     assertThatThrownBy(
             () ->
                 c.logClientWithExporter(
@@ -714,6 +705,22 @@ class GraylogClientTest {
                                 .build())
                         .build()))
         .isInstanceOf(RuntimeException.class);
+    c.close();
+    c.close();
+    assertThat(c.isClosed()).isTrue();
+    // registering after close closes immediately
+    AutoCloseable[] closedFlag = {null};
+    c.register(() -> closedFlag[0] = () -> {});
+    assertThat(closedFlag[0]).isNotNull();
+    assertThat(gelf).isNotNull();
+    assertThat(otlp).isNotNull();
+    // a closed client refuses new log clients
+    assertThatThrownBy(c::logClient).isInstanceOf(CancelledException.class);
+    assertThatThrownBy(
+            () ->
+                c.logClientWithExporter(
+                    new GelfLogExporter(GelfUdpTransport.builder("h").build(), null), null))
+        .isInstanceOf(CancelledException.class);
   }
 
   @Test

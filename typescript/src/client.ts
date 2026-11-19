@@ -1,6 +1,7 @@
 // Service-owned: the Graylog Open client (REST admin + search, GELF/OTLP log clients).
 
 import {
+  CancelledError,
   ConflictError,
   type HealthStatus,
   HttpTransport,
@@ -228,7 +229,7 @@ function gelfInputConfiguration(
 export class GraylogClient {
   /** The immutable configuration. */
   readonly config: GraylogConfig;
-  readonly #transport: HttpTransport;
+  readonly #http: HttpTransport;
   readonly #internals: ClientInternals;
   readonly #logClients = new Set<LogClient>();
   #closed = false;
@@ -238,7 +239,7 @@ export class GraylogClient {
     const cfg = GraylogConfig.from(config);
     this.config = cfg;
     this.#internals = internals;
-    this.#transport = new HttpTransport({
+    this.#http = new HttpTransport({
       ...internals,
       config: cfg,
       defaultHeaders: (): Record<string, string> => {
@@ -257,9 +258,20 @@ export class GraylogClient {
     return new GraylogClient(GraylogConfig.fromEnv(overrides));
   }
 
+  /** Every REST call on a closed client fails with `CANCELLED` (same in all five languages). */
+  get #transport(): HttpTransport {
+    if (this.#closed) throw new CancelledError("graylog: client is closed");
+    return this.#http;
+  }
+
+  /** True once {@link close} was called. */
+  get closed(): boolean {
+    return this.#closed;
+  }
+
   /** The shared HTTP transport (for service modules). @internal */
   get transport(): HttpTransport {
-    return this.#transport;
+    return this.#http;
   }
 
   // ---- client surface ---------------------------------------------------------------------
@@ -452,7 +464,7 @@ export class GraylogClient {
     if (state.state === "FAILED") {
       if (created) await this.deleteInput(id, call).catch(() => undefined);
       throw new ConflictError(
-        `ensureGelfInput ${protocol}:${port}: input failed to start${state.detailedMessage === null ? "" : `: ${this.#transport.redact(state.detailedMessage).slice(0, 300)}`}`,
+        `ensureGelfInput ${protocol}:${port}: input failed to start${state.detailedMessage === null ? "" : `: ${this.#http.redact(state.detailedMessage).slice(0, 300)}`}`,
       );
     }
     return { ...input, created };
@@ -673,7 +685,7 @@ export class GraylogClient {
     const execution = (body.execution ?? {}) as { completed_exceptionally?: unknown };
     if (errors.length > 0 || execution.completed_exceptionally === true) {
       const description = errors.map((e) => e.description).find((d) => typeof d === "string");
-      const text = this.#transport.redact(
+      const text = this.#http.redact(
         typeof description === "string" ? description : "query failed",
       );
       throw new ValidationError(`search: ${text.slice(0, 300)}`);
@@ -765,6 +777,7 @@ export class GraylogClient {
    * (`otlp`). Closed (flushed) by {@link close}.
    */
   logClient(options: GraylogLogClientOptions = {}): LogClient {
+    if (this.#closed) throw new CancelledError("logClient: client is closed");
     const protocol = options.protocol ?? this.config.gelfProtocol;
     const exporter =
       protocol === "otlp"
@@ -797,6 +810,6 @@ export class GraylogClient {
     const clients = [...this.#logClients];
     this.#logClients.clear();
     await Promise.all(clients.map((c) => c.close().catch(() => undefined)));
-    await this.#transport.close();
+    await this.#http.close();
   }
 }

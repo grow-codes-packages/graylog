@@ -28,15 +28,18 @@ Trademarks
 -------------------------------------------------------------------------------
 
 This project is an independent, community-maintained client library. It is not
-affiliated with, endorsed or sponsored by Graylog, Inc..
-Graylog Open is a trademark of Graylog, Inc.. All other product names, logos and
+affiliated with, endorsed or sponsored by Graylog, Inc.
+Graylog and Graylog Open are trademarks of Graylog, Inc. All other product names, logos and
 brands are the property of their respective owners and are used for
 identification purposes only.
 
 The Graylog Open server itself is licensed separately by its owner:
 SSPL-1.0 (source-available).
 This SDK contains no Graylog Open server code; it talks to the service over its
-public network API.
+public network interfaces only: the documented REST API, the public GELF 1.1
+wire format (UDP, TCP, HTTP) and the standard OTLP/gRPC logs protocol. The
+Docker test fixture runs the unmodified upstream images (graylog/graylog,
+OpenSearch, MongoDB); they are not part of the distributed packages.
 
 -------------------------------------------------------------------------------
 Third-party attributions
@@ -59,3 +62,35 @@ copyright and licence.
 
   CODE_OF_CONDUCT.md is adapted from the Contributor Covenant, version 2.1,
   https://www.contributor-covenant.org, licensed under CC BY 4.0.
+
+  OTLP log messages (TypeScript, Rust, Java). The ExportLogsServiceRequest /
+  ExportLogsServiceResponse messages of the OTLP/gRPC LogsService are
+  hand-encoded from the field numbers and types of the OpenTelemetry protocol
+  definitions (opentelemetry-proto, opentelemetry/proto/collector/logs/v1,
+  logs/v1, common/v1, resource/v1):
+    https://github.com/open-telemetry/opentelemetry-proto
+    Copyright The OpenTelemetry Authors, licensed under the Apache License,
+    Version 2.0.
+  google.rpc.Status (decoded from gRPC error details) follows the Google APIs
+  common protos (Copyright Google LLC, Apache-2.0). No code was copied from
+  these projects. Go uses the generated go.opentelemetry.io/proto/otlp package
+  and Python the opentelemetry-proto package instead (both Apache-2.0).
+
+  GELF. The message format and the UDP chunking header follow the public GELF
+  1.1 specification published by Graylog, Inc.
+  (https://go2docs.graylog.org/current/getting_in_log_data/gelf.html); no
+  Graylog code was copied.
+
+  Notable runtime dependencies of the service code:
+    TypeScript: undici (MIT), @opentelemetry/api (Apache-2.0); OTLP/gRPC uses
+      node:http2 (no extra dependency).
+    Rust: reqwest (MIT OR Apache-2.0, HTTP/2 for OTLP/gRPC), rustls and
+      tokio-rustls (Apache-2.0 OR ISC OR MIT, GELF TCP TLS), flate2 (MIT OR
+      Apache-2.0).
+    Go: google.golang.org/grpc (Apache-2.0), go.opentelemetry.io/proto/otlp
+      (Apache-2.0), google.golang.org/protobuf (BSD-3-Clause).
+    Python: httpx (BSD-3-Clause); the optional extra "otlp" adds grpcio
+      (Apache-2.0).
+    Java: com.squareup.okhttp3:okhttp-jvm 5.5.0 (Apache-2.0) for OTLP/gRPC over
+      HTTP/2, with its dependencies com.squareup.okio:okio (Apache-2.0) and
+      org.jetbrains.kotlin:kotlin-stdlib (Apache-2.0); Jackson (Apache-2.0).

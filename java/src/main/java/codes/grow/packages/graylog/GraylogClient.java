@@ -151,6 +151,12 @@ public final class GraylogClient implements AutoCloseable {
     closeQuietly(resource);
   }
 
+  private void requireOpen() {
+    if (closed.get()) {
+      throw new CancelledException("logClient: client is closed");
+    }
+  }
+
   // ---- requests --------------------------------------------------------------------------
 
   private TransportRequest.Builder request(String method, String path, String operation) {
@@ -1222,8 +1228,10 @@ public final class GraylogClient implements AutoCloseable {
    *
    * @param options batching, resource, redaction and transport options
    * @return the log client
+   * @throws CancelledException when the client is closed
    */
   public BatchingLogClient logClient(GraylogLogClientOptions options) {
+    requireOpen();
     GraylogLogClientOptions o = options == null ? GraylogLogClientOptions.defaults() : options;
     GelfProtocol p = o.protocol().orElse(config.gelfProtocol());
     LogExporter exporter;
@@ -1259,9 +1267,11 @@ public final class GraylogClient implements AutoCloseable {
    * @param exporter the exporter
    * @param options batching, resource and redaction
    * @return the log client
+   * @throws CancelledException when the client is closed
    */
   public BatchingLogClient logClientWithExporter(
       LogExporter exporter, GraylogLogClientOptions options) {
+    requireOpen();
     GraylogLogClientOptions o = options == null ? GraylogLogClientOptions.defaults() : options;
     BatchingLogClient lc;
     try {

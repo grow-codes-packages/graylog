@@ -307,7 +307,7 @@ describe("GraylogClient surface", () => {
     );
     await client.close();
     await client.close();
-    await expect(client.ping()).rejects.toMatchObject({ code: "CONFIG" });
+    await expect(client.ping()).rejects.toMatchObject({ code: "CANCELLED" });
   });
 
   it("serverVersion: UNSUPPORTED when no version is reported", async () => {

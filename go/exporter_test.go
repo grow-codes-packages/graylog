@@ -170,6 +170,13 @@ func TestNewLogClient(t *testing.T) {
 	if len(ft.sent) != 1 || ft.closed != 1 {
 		t.Fatalf("close must flush: sent=%d closed=%d", len(ft.sent), ft.closed)
 	}
+	// A closed client refuses new log clients with CANCELLED.
+	if _, err := c.NewLogClient(LogOptions{Transport: ft}); !errors.Is(err, ErrCancelled) {
+		t.Fatalf("closed NewLogClient: %v", err)
+	}
+	if _, err := c.NewLogClientWithExporter(NewGelfLogExporter(ft, FromLogRecordOptions{}), LogClientOptions{}); !errors.Is(err, ErrCancelled) {
+		t.Fatalf("closed NewLogClientWithExporter: %v", err)
+	}
 
 	// Errors.
 	c2 := newTestClient(t, "http://127.0.0.1:9", func(cfg *Config) { cfg.OTLPEndpoint = "https://h:1" })

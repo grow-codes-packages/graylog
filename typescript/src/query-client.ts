@@ -1,11 +1,10 @@
 // Service-owned: LogQueryClient for Graylog (views search, polling tail, streams, fields).
 
-import { ValidationError } from "./core/index.js";
+import { CancelledError, ValidationError } from "./core/index.js";
 import type { GraylogClient, SearchSort } from "./client.js";
 import { logRecordFromMessage } from "./gelf.js";
 import {
   BaseLogQueryClient,
-  pollTail,
   type LogRecord,
   type LogSearchOptions,
   type LogSearchResult,
@@ -15,6 +14,12 @@ import {
 
 /** Default poll interval of {@link GraylogLogQueryClient.tail} (decision 1). */
 export const DEFAULT_TAIL_INTERVAL_MS = 2000;
+
+/**
+ * How far back each tail poll looks before the newest record seen, so records that become
+ * searchable late (ingest takes 1–2 s) are not missed; duplicates are dropped by message id.
+ */
+export const TAIL_OVERLAP_MS = 10_000;
 
 /** Options of {@link GraylogLogQueryClient}. */
 export interface GraylogLogQueryClientOptions {
@@ -27,7 +32,7 @@ export interface GraylogLogQueryClientOptions {
 /**
  * {@link LogQueryClient} on top of {@link GraylogClient.search}: absolute time range, timestamp
  * order (ties broken by `gl2_message_id`), offset cursors, hits normalised into log records.
- * Graylog has no streaming API: {@link tail} polls every 2 s.
+ * Graylog has no streaming API: {@link tail} polls every 2 s with a 10 s look-back window.
  */
 export class GraylogLogQueryClient extends BaseLogQueryClient {
   readonly #client: GraylogClient;
@@ -76,15 +81,92 @@ export class GraylogLogQueryClient extends BaseLogQueryClient {
     return out;
   }
 
+  /**
+   * Polls search every `opts.intervalMs` (default 2 s; Graylog has no streaming API) and calls
+   * `onRecord` once per new matching record, oldest first, starting at `opts.start` (default now).
+   * Each poll looks back {@link TAIL_OVERLAP_MS} before the newest record seen and drops duplicates
+   * by message id, so late records are delivered too. Search errors go to `opts.onError` and
+   * polling continues. The tail stops with the handle or when the client is closed. Throws
+   * `CancelledError` on a closed client.
+   */
   override tail(
     query: string,
     onRecord: (record: LogRecord) => void,
     opts: TailOptions = {},
   ): TailHandle {
-    return pollTail(this, query, onRecord, {
-      ...opts,
-      intervalMs: opts.intervalMs ?? DEFAULT_TAIL_INTERVAL_MS,
-    });
+    const client = this.#client;
+    if (client.closed) throw new CancelledError("logs.tail: client is closed");
+    const intervalMs =
+      opts.intervalMs !== undefined && opts.intervalMs > 0
+        ? opts.intervalMs
+        : DEFAULT_TAIL_INTERVAL_MS;
+    const since = (opts.start ?? new Date()).getTime();
+    const streams = this.#streams;
+    const seen = new Map<string, number>();
+    let newest: number | undefined;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const controller = new AbortController();
+    const sort: SearchSort[] = [
+      { field: "timestamp", order: "asc" },
+      { field: "gl2_message_id", order: "asc" },
+    ];
+
+    const poll = async (): Promise<void> => {
+      const from = newest === undefined ? since : Math.max(since, newest - TAIL_OVERLAP_MS);
+      for (let offset = 0; ;) {
+        const res = await client.search(query, {
+          from: new Date(from),
+          to: new Date(Date.now() + 60_000),
+          limit: 1000,
+          offset,
+          sort,
+          ...(streams === undefined ? {} : { streams }),
+          signal: controller.signal,
+        });
+        for (const m of res.messages) {
+          if (stopped) return;
+          if (m.id !== "" && seen.has(m.id)) continue;
+          const t = m.timestamp?.getTime() ?? since;
+          seen.set(m.id, t);
+          if (newest === undefined || t > newest) newest = t;
+          try {
+            onRecord(logRecordFromMessage(m.fields));
+          } catch {
+            // a failing callback must not stop the tail
+          }
+        }
+        offset += res.messages.length;
+        if (res.messages.length === 0 || offset >= res.total) break;
+      }
+      // Forget ids that can no longer appear in a window.
+      if (newest !== undefined) {
+        const cutoff = newest - 2 * TAIL_OVERLAP_MS;
+        for (const [id, t] of seen) if (t < cutoff) seen.delete(id);
+      }
+    };
+    const stop = (): void => {
+      stopped = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
+    const tick = async (): Promise<void> => {
+      if (client.closed) {
+        stop();
+        return;
+      }
+      try {
+        await poll();
+      } catch (error) {
+        if (!stopped) opts.onError?.(error);
+      }
+      if (!stopped) {
+        timer = setTimeout(() => void tick(), intervalMs);
+        timer.unref();
+      }
+    };
+    void tick();
+    return { stop };
   }
 
   /** Titles of every stream (all pages). */

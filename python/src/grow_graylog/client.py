@@ -860,7 +860,7 @@ class GraylogClient(_ClientCore):
         Log clients are flushed and closed by :meth:`close`.
         """
         if self._closed:
-            raise ConfigError("log_client: client is closed")
+            raise CancelledError("log_client: client is closed")
         exporter = self._exporter(
             protocol, host, transport, compression, chunk_size, bulk, headers, bearer_token
         )
@@ -1204,7 +1204,7 @@ class AsyncGraylogClient(_ClientCore):
     ) -> AsyncBatchingLogClient:
         """Async batching log client; see :meth:`GraylogClient.log_client`."""
         if self._closed:
-            raise ConfigError("log_client: client is closed")
+            raise CancelledError("log_client: client is closed")
         exporter = self._exporter(
             protocol, host, transport, compression, chunk_size, bulk, headers, bearer_token
         )

@@ -170,3 +170,82 @@ async def test_async_query_client(mock: respx.MockRouter) -> None:
         assert [r.body for r in got] == ["live"]
         assert "message" in await query.list_labels()
         assert await query.list_streams() == ["A"]
+
+
+def test_tail_pages_overlaps_and_survives_callback_errors(mock: respx.MockRouter) -> None:
+    base = datetime.now(timezone.utc)
+    first, second = base + timedelta(seconds=1), base + timedelta(seconds=2)
+    route = mock.post("/api/views/search/sync").mock(
+        side_effect=[
+            hits(gelf_hit("a", first), total=2),
+            hits(gelf_hit("b", second), total=2),
+            hits(gelf_hit("a", first), gelf_hit("b", second), {"message": "no-id"}),
+        ]
+        + [hits()] * 100
+    )
+    got: list[str] = []
+
+    def on_record(record: sdk.LogRecord) -> None:
+        got.append(record.body)
+        raise RuntimeError("callback failure")
+
+    with sdk.GraylogClient(config()) as c:
+        query = c.log_query_client(streams=["s1"])
+        tail = query.tail("x", on_record, interval_s=0.01, start=base)
+        deadline = time.monotonic() + 5
+        while "no-id" not in got and time.monotonic() < deadline:
+            time.sleep(0.01)
+        tail.stop()
+        tail.stop()
+    assert got[:3] == ["a", "b", "no-id"]
+    bodies = [json.loads(call.request.content)["queries"][0] for call in route.calls]
+    assert bodies[1]["search_types"][0]["offset"] == 1
+    assert bodies[0]["filter"]["filters"][0]["id"] == "s1"
+    # after the first poll the window starts 10 s before the newest record seen (but not before
+    # the tail's start)
+    assert bodies[2]["timerange"]["from"].startswith(base.strftime("%Y-%m-%dT%H:%M:%S"))
+
+
+def test_tail_window_forgets_old_ids() -> None:
+    from grow_graylog.query_client import _tail_interval, _TailWindow
+
+    assert _tail_interval(0) == sdk.DEFAULT_TAIL_INTERVAL_S
+    assert _tail_interval(timedelta(seconds=3)) == 3
+
+    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    window = _TailWindow(start)
+    assert window.start() == start
+    old = sdk.GraylogMessage("old", "i", start, {"message": "old"})
+    new = sdk.GraylogMessage("new", "i", start + timedelta(seconds=60), {"message": "new"})
+    assert [r.body for r in window.fresh([old, new, new])] == ["old", "new"]
+    assert window.start() == start + timedelta(seconds=60 - sdk.TAIL_OVERLAP_S)
+    window.forget()
+    assert set(window.seen) == {"new"}
+
+
+def test_closed_client_raises_cancelled(mock: respx.MockRouter) -> None:
+    c = sdk.GraylogClient(config())
+    query = c.log_query_client()
+    c.close()
+    with pytest.raises(sdk.CancelledError):
+        query.tail("x", lambda r: None)
+    with pytest.raises(sdk.CancelledError):
+        c.log_client()
+    with pytest.raises(sdk.CancelledError):
+        c.ping()
+
+
+async def test_async_closed_client_and_close_stops_tail(mock: respx.MockRouter) -> None:
+    mock.post("/api/views/search/sync").mock(return_value=hits())
+    c = sdk.AsyncGraylogClient(config())
+    query = c.log_query_client()
+    tail = await query.tail("x", lambda r: None, interval_s=0.01)
+    await asyncio.sleep(0.03)
+    await c.aclose()
+    await asyncio.sleep(0)
+    assert tail._task.cancelled() or tail._task.done()
+    await tail.stop()
+    with pytest.raises(sdk.CancelledError):
+        await query.tail("x", lambda r: None)
+    with pytest.raises(sdk.CancelledError):
+        c.log_client()
