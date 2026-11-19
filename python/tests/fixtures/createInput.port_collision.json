@@ -1,0 +1,35 @@
+{
+  "function": "createInput",
+  "case": "port_collision",
+  "request": {
+    "method": "POST",
+    "path": "/api/system/inputs",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Authorization": "Basic <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "title": "grow-sdk collision 179503370112643",
+      "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
+      "global": true,
+      "configuration": {
+        "bind_address": "0.0.0.0",
+        "port": 12201,
+        "use_null_delimiter": true
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "location": "http://172.30.0.4:9000/system/inputs/6afe0a6607ba3acebff1892e",
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "id": "6afe0a6607ba3acebff1892e"
+    }
+  }
+}

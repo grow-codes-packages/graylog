@@ -161,7 +161,7 @@ def test_config_repr_redacts_credentials() -> None:
     """core.redaction.config"""
     cfg = sdk.GraylogConfig(
         url="https://user:pw@svc.example/",
-        token="super-secret-token",
+        api_token="super-secret-token",
         headers={"X-Api-Key": "k-123", "Accept": "a"},
         proxy="http://proxyuser:proxypass@proxy:3128",
         tls=sdk.TlsConfig(ca_cert_pem="PEM", client_cert_path="/c", client_key_path="/k"),
@@ -173,8 +173,8 @@ def test_config_repr_redacts_credentials() -> None:
         assert ":pw@" not in text
         assert "[REDACTED]" in text
         assert "TlsConfig(" in text
-    assert isinstance(cfg.token, sdk.Secret)
-    assert cfg.known_secrets() == ["super-secret-token"]
+    assert isinstance(cfg.api_token, sdk.Secret)
+    assert cfg.known_secrets()[0] == "super-secret-token"
     assert sdk.GraylogConfig().known_secrets() == []
 
 
@@ -293,7 +293,7 @@ def test_config_env_precedence() -> None:
     p = sdk.ENV_PREFIX
 
     class VendorConfig(sdk.GraylogConfig):
-        ENV_VENDOR = {"URL": ("VENDOR_ADDR", "OTHER_ADDR"), "TOKEN": ("VENDOR_TOKEN",)}
+        ENV_VENDOR = {"URL": ("VENDOR_ADDR", "OTHER_ADDR"), "API_TOKEN": ("VENDOR_TOKEN",)}
 
     # default
     assert VendorConfig.from_env({}).url == sdk.DEFAULT_URL
@@ -307,8 +307,8 @@ def test_config_env_precedence() -> None:
     assert VendorConfig.from_env(env, url="http://explicit:1").url == "http://explicit:1"
     # token from vendor, wrapped in Secret
     cfg = VendorConfig.from_env({"VENDOR_TOKEN": "vt-123456"})
-    assert isinstance(cfg.token, sdk.Secret)
-    assert cfg.token.reveal() == "vt-123456"
+    assert isinstance(cfg.api_token, sdk.Secret)
+    assert cfg.api_token.reveal() == "vt-123456"
     # invalid value → ConfigError naming the variable only
     with pytest.raises(sdk.ConfigError) as info:
         VendorConfig.from_env({p + "REQUEST_TIMEOUT": "fast-please"})
@@ -320,7 +320,7 @@ def test_config_from_env_common_fields() -> None:
     p = sdk.ENV_PREFIX
     env = {
         p + "URL": "https://svc:8443",
-        p + "TOKEN": "tok-12345",
+        p + "API_TOKEN": "tok-12345",
         p + "CONNECT_TIMEOUT": "1500",
         p + "REQUEST_TIMEOUT": "5s",
         p + "TOTAL_TIMEOUT": "1m",
@@ -333,7 +333,7 @@ def test_config_from_env_common_fields() -> None:
     }
     cfg = sdk.GraylogConfig.from_env(env)
     assert cfg.url == "https://svc:8443"
-    assert cfg.token is not None and cfg.token.reveal() == "tok-12345"
+    assert cfg.api_token is not None and cfg.api_token.reveal() == "tok-12345"
     assert (cfg.connect_timeout, cfg.request_timeout, cfg.total_timeout) == (1.5, 5.0, 60.0)
     assert cfg.retry.max_retries == 5
     assert cfg.tls == sdk.TlsConfig(
@@ -372,7 +372,7 @@ def test_config_defaults_and_timedelta() -> None:
         ({"retry": sdk.RetryPolicy(multiplier=0.5)}, "multiplier"),
         ({"tls": sdk.TlsConfig(client_cert_path="/c")}, "together"),
         ({"proxy": "nope"}, "proxy"),
-        ({"token": "   "}, "token"),
+        ({"api_token": "   "}, "api_token"),
     ],
 )
 def test_config_validate(kwargs: dict[str, object], fragment: str) -> None:

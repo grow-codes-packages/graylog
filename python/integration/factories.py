@@ -1,9 +1,8 @@
 """Factories the integration suite and the conformance runner use (owned by this repository).
 
-sdk-kit generates this file once. Replace the bodies when the service needs more setup (extra
-credentials from /bootstrap/env, namespaces, a provider built on the client …) and keep the
-capability sets honest: every capability left out skips scenarios, and each skip must be
-explained in docs/compatibility.md.
+Capabilities: core "version"; logging "query", "tail", "streams", "labels" (nothing skipped).
+The logging target sends GELF over TCP (the bootstrap default) or HTTP and reads back through the
+views search API.
 """
 
 from __future__ import annotations
@@ -12,29 +11,47 @@ from collections.abc import Mapping
 from typing import Any
 
 import grow_graylog as sdk
+from grow_graylog.testing import LoggingTarget
 
 URL_VAR = "GROW_GRAYLOG_URL"
 
 #: Capabilities of the deployment under test for the core scenarios ("version" = serverVersion).
 CORE_CAPABILITIES: set[str] = {"version"}
 
-
-def core_client(env: Mapping[str, str]) -> sdk.GraylogClient:
-    """A client configured from the test environment (URL, token, … from /bootstrap/env)."""
-    return sdk.GraylogClient.from_env(env)
-
-
-def async_core_client(env: Mapping[str, str]) -> sdk.AsyncGraylogClient:
-    return sdk.AsyncGraylogClient.from_env(env)
-
-
 #: Capabilities for the logging scenarios: query, tail, streams, labels.
-LOGGING_CAPABILITIES: set[str] = {"query"}
+LOGGING_CAPABILITIES: set[str] = {"query", "tail", "streams", "labels"}
 
 
-def logging_target(env: Mapping[str, str], scenario: Mapping[str, Any]) -> Any | None:
-    """A ``testing.LoggingTarget(client, query)`` for one scenario; ``None`` skips the suite.
+def core_client(env: Mapping[str, str], **overrides: Any) -> sdk.GraylogClient:
+    """A client configured from the test environment (URL, token … from /bootstrap/env)."""
+    overrides.setdefault("retry", sdk.RetryPolicy(max_retries=2, initial_backoff=0.05))
+    return sdk.GraylogClient.from_env(env, **overrides)
 
-    Apply ``scenario.get("batchOptions")`` when building the log client.
-    """
-    return None
+
+def async_core_client(env: Mapping[str, str], **overrides: Any) -> sdk.AsyncGraylogClient:
+    overrides.setdefault("retry", sdk.RetryPolicy(max_retries=2, initial_backoff=0.05))
+    return sdk.AsyncGraylogClient.from_env(env, **overrides)
+
+
+def batch_options(scenario: Mapping[str, Any] | None = None) -> sdk.BatchOptions:
+    """Fast flushes plus the scenario's ``batchOptions``."""
+    data: dict[str, Any] = {"flushIntervalMs": 200}
+    if scenario:
+        data.update(scenario.get("batchOptions") or {})
+    return sdk.BatchOptions.from_mapping(data)
+
+
+def logging_target(
+    client: sdk.GraylogClient,
+    scenario: Mapping[str, Any],
+    protocol: sdk.LogProtocol = "tcp",
+) -> LoggingTarget:
+    """A ``LoggingTarget(log client, query client)`` for one scenario."""
+    return LoggingTarget(
+        client=client.log_client(
+            protocol,
+            options=batch_options(scenario),
+            resource={"service.name": f"sdk-py-conformance-{protocol}"},
+        ),
+        query=client.log_query_client(),
+    )

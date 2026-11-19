@@ -1,0 +1,24 @@
+{
+  "function": "deleteInput",
+  "case": "not_found",
+  "request": {
+    "method": "DELETE",
+    "path": "/api/system/inputs/6afe0a6607ba3acebff1891c",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Authorization": "Basic <redacted>"
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "type": "ApiError",
+      "message": "Input <6afe0a6607ba3acebff1891c> not found!"
+    }
+  }
+}

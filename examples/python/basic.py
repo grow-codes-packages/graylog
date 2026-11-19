@@ -6,7 +6,7 @@ import grow_graylog as sdk
 
 
 def main() -> None:
-    # Reads GROW_GRAYLOG_URL, GROW_GRAYLOG_TOKEN, timeouts … from the environment.
+    # Reads GROW_GRAYLOG_URL, GROW_GRAYLOG_API_TOKEN, timeouts … from the environment.
     with sdk.GraylogClient.from_env() as client:
         status = client.health()
         print(f"healthy={status.healthy} status={status.status}")

@@ -15,6 +15,8 @@ from grow_graylog.testing import ConformanceRunner, assert_scenario, pytest_para
 def test_health(client: sdk.GraylogClient) -> None:
     status = client.health()
     assert status.healthy, status
+    assert status.status == "ok"
+    assert status.details["lb_status"] == "ALIVE"
 
 
 def test_ping(client: sdk.GraylogClient) -> None:
@@ -26,7 +28,9 @@ def test_server_version(client: sdk.GraylogClient) -> None:
         with pytest.raises(sdk.UnsupportedError):
             client.server_version()
         return
-    assert client.server_version()
+    version = client.server_version()
+    assert version[0].isdigit(), version
+    print(f"graylog {version}")
 
 
 def test_close_is_idempotent(env: dict[str, str]) -> None:
@@ -45,7 +49,7 @@ def test_async_client(env: dict[str, str]) -> None:
 
 
 def test_bad_token_is_rejected(env: dict[str, str]) -> None:
-    with core_client({**env, "GROW_GRAYLOG_TOKEN": "definitely-wrong-token"}) as c:
+    with core_client({**env, "GROW_GRAYLOG_API_TOKEN": "definitely-wrong-token"}) as c:
         with pytest.raises(sdk.AuthenticationError) as info:
             c.ping()
         assert "definitely-wrong-token" not in str(info.value)
