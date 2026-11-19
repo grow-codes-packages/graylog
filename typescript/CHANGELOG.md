@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/grow-codes-packages/graylog/compare/typescript-v0.1.0...typescript-v0.1.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* sync graylog to sdk-kit 0.3.0 (GRO-1373) ([#11](https://github.com/grow-codes-packages/graylog/issues/11)) ([cbf72fc](https://github.com/grow-codes-packages/graylog/commit/cbf72fc15498b13699a919c036e841a6d5aa5d1f))
+
 ## 0.1.0 (2026-11-19)
 
 
