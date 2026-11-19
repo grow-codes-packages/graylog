@@ -38,23 +38,23 @@ async-trait = "0.1.80"
 bytes = "1.6"
 futures = { version = "0.3.30", default-features = false, features = ["std", "async-await"] }
 httpdate = "1.0"
-rand = { version = "0.9", default-features = false, features = ["std", "thread_rng"] }
+rand = { version = "0.10", default-features = false, features = ["std", "thread_rng"] }
 reqwest = { version = "0.12.9", default-features = false, features = ["rustls-tls-native-roots", "json", "gzip", "http2"] }
 serde = { version = "1.0.200", features = ["derive"] }
 serde_json = "1.0.120"
-sha2 = "0.10.8"
+sha2 = "0.11.1"
 tokio = { version = "1.43", features = ["rt", "rt-multi-thread", "time", "sync", "macros", "net", "io-util"] }
 tokio-util = { version = "0.7.11", default-features = false }
 tracing = { version = "0.1.40", default-features = false, features = ["std", "attributes"] }
 url = "2.5"
 zeroize = { version = "1.8", features = ["zeroize_derive"] }
 tracing-subscriber = { version = "0.3.18", default-features = false, features = ["std", "registry", "fmt"] }
-opentelemetry = { version = "0.31", default-features = false, features = ["trace"] }
+opentelemetry = { version = "0.33", default-features = false, features = ["trace"] }
 log = { version = "0.4.22", optional = true, features = ["std", "kv"] }
 flate2 = "1.0.30"
 regex = "1.10"
 humantime = "2.1"
-base64 = "0.22"
+base64 = "0.23"
 http = "1.1"
 http-body-util = "0.1.2"
 rustls = { version = "0.23.20", default-features = false, features = ["ring", "std", "tls12", "logging"] }
