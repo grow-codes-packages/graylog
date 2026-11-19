@@ -352,13 +352,19 @@ class OtlpTest {
         .isInstanceOf(TimeoutException.class);
     slow.shutdown();
 
-    server.enqueue(ok(new byte[0]).newBuilder().headersDelay(5, TimeUnit.SECONDS).build());
-    OtlpGrpcLogExporter c = OtlpGrpcLogExporter.builder(endpoint()).build();
-    CompletableFuture<ExportResult> f = c.export(List.of(record("a")), PLAIN);
-    Thread.sleep(100);
-    assertThat(f.cancel(true)).isTrue();
-    assertThat(f.isCancelled()).isTrue();
-    c.shutdown();
+    // A fresh server: the delayed stream above can make MockWebServer drop its connections.
+    try (MockWebServer slowServer = new MockWebServer()) {
+      slowServer.setProtocols(List.of(Protocol.H2_PRIOR_KNOWLEDGE));
+      slowServer.enqueue(ok(new byte[0]).newBuilder().headersDelay(5, TimeUnit.SECONDS).build());
+      slowServer.start();
+      OtlpGrpcLogExporter c =
+          OtlpGrpcLogExporter.builder("http://127.0.0.1:" + slowServer.getPort()).build();
+      CompletableFuture<ExportResult> f = c.export(List.of(record("a")), PLAIN);
+      assertThat(slowServer.takeRequest(5, TimeUnit.SECONDS)).isNotNull();
+      assertThat(f.cancel(true)).isTrue();
+      assertThat(f.isCancelled()).isTrue();
+      c.shutdown();
+    }
 
     int port;
     try (ServerSocket s = new ServerSocket(0)) {
