@@ -1,0 +1,129 @@
+{
+  "function": "search",
+  "case": "empty",
+  "request": {
+    "method": "POST",
+    "path": "/api/views/search/sync",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Authorization": "Basic <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "queries": [
+        {
+          "id": "q1",
+          "query": {
+            "type": "elasticsearch",
+            "query_string": "marker:growsdk179503370112643-nomatch"
+          },
+          "timerange": {
+            "type": "absolute",
+            "from": "2026-11-18T20:28:15.935Z",
+            "to": "2026-11-18T20:28:24.794Z"
+          },
+          "search_types": [
+            {
+              "id": "st1",
+              "type": "messages",
+              "limit": 10,
+              "offset": 0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "execution": {
+        "done": true,
+        "cancelled": false,
+        "completed_exceptionally": false
+      },
+      "results": {
+        "q1": {
+          "query": {
+            "id": "q1",
+            "timerange": {
+              "from": "2026-11-18T20:28:15.935Z",
+              "to": "2026-11-18T20:28:24.794Z",
+              "type": "absolute"
+            },
+            "filter": {
+              "type": "or",
+              "filters": [
+                {
+                  "type": "stream",
+                  "id": "6afe0a6607ba3acebff1894e"
+                },
+                {
+                  "type": "stream",
+                  "id": "000000000000000000000001"
+                }
+              ]
+            },
+            "filters": [],
+            "query": {
+              "type": "elasticsearch",
+              "query_string": "marker:growsdk179503370112643-nomatch"
+            },
+            "search_types": [
+              {
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "stream_categories": [],
+                "type": "messages",
+                "id": "st1",
+                "name": null,
+                "limit": 10,
+                "offset": 0,
+                "sort": null,
+                "fields": [],
+                "decorators": [],
+                "filter": null,
+                "filters": []
+              }
+            ]
+          },
+          "execution_stats": {
+            "duration": 6,
+            "timestamp": "2026-11-18T20:28:24.147Z",
+            "effective_timerange": {
+              "from": "2026-11-18T20:28:15.935Z",
+              "to": "2026-11-18T20:28:24.794Z",
+              "type": "absolute"
+            }
+          },
+          "search_types": {
+            "st1": {
+              "id": "st1",
+              "messages": [],
+              "effective_timerange": {
+                "from": "2026-11-18T20:28:15.935Z",
+                "to": "2026-11-18T20:28:24.794Z",
+                "type": "absolute"
+              },
+              "total_results": 0,
+              "type": "messages"
+            }
+          },
+          "errors": [],
+          "state": "COMPLETED"
+        }
+      },
+      "progress": 0,
+      "id": "6afe0a6807ba3acebff18996",
+      "search_id": "6afe0a6807ba3acebff18994",
+      "owner": "admin",
+      "executing_node": "6d14d009-e915-4e0f-b29a-42607f6ee195"
+    }
+  }
+}

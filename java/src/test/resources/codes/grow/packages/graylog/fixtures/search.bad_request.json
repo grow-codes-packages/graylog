@@ -1,0 +1,36 @@
+{
+  "function": "search",
+  "case": "bad_request",
+  "request": {
+    "method": "POST",
+    "path": "/api/views/search/sync",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Authorization": "Basic <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "queries": [
+        {
+          "id": "q1"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "type": "RequestError",
+      "message": "Error at \"queries.[0]\" [1, 25]: Missing required properties: searchTypes",
+      "line": 1,
+      "column": 25,
+      "path": "queries.[0]",
+      "reference_path": "org.graylog.plugins.views.search.rest.AutoValue_SearchDTO$Builder[\"queries\"]->java.util.LinkedHashSet[0]->org.graylog.plugins.views.search.rest.QueryDTO.Builder"
+    }
+  }
+}

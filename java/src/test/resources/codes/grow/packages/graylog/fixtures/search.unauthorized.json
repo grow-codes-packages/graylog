@@ -1,0 +1,46 @@
+{
+  "function": "search",
+  "case": "unauthorized",
+  "request": {
+    "method": "POST",
+    "path": "/api/views/search/sync",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Authorization": "Basic <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "queries": [
+        {
+          "id": "q1",
+          "query": {
+            "type": "elasticsearch",
+            "query_string": "*"
+          },
+          "timerange": {
+            "type": "absolute",
+            "from": "2026-11-18T20:28:15.935Z",
+            "to": "2026-11-18T20:28:24.794Z"
+          },
+          "search_types": [
+            {
+              "id": "st1",
+              "type": "messages",
+              "limit": 100,
+              "offset": 0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "www-authenticate": "Basic realm=\"Graylog Server\"",
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195"
+    },
+    "body": null
+  }
+}

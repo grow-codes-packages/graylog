@@ -16,7 +16,7 @@ public final class BasicExample {
    * @param args unused
    */
   public static void main(String[] args) {
-    // Reads GROW_GRAYLOG_URL, GROW_GRAYLOG_TOKEN, timeouts, TLS and proxy settings.
+    // Reads GROW_GRAYLOG_URL, GROW_GRAYLOG_API_TOKEN (or GROW_GRAYLOG_USER/PASSWORD), GELF settings, timeouts, TLS and proxy settings.
     try (var client = GraylogClient.fromEnv()) {
       HealthStatus health = client.health(); // never throws for an unreachable service
       System.out.println("health: " + health);

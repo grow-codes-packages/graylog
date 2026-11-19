@@ -11,7 +11,7 @@
   <packaging>jar</packaging>
 
   <name>Grow Codes SDK for Graylog Open</name>
-  <description>Java client for Graylog Open by Grow Codes: typed API, retries, timeouts, redaction and a conformance suite.</description>
+  <description>Java client for Graylog Open by Grow Codes: GELF UDP/TCP/HTTP and OTLP log clients, search, admin, retries, timeouts, redaction and a conformance suite.</description>
   <url>https://grow-codes-packages.github.io/graylog/</url>
   <inceptionYear>2026</inceptionYear>
 
@@ -60,6 +60,8 @@
     <opentelemetry.version>1.67.0</opentelemetry.version>
     <logback.version>1.6.6</logback.version>
     <log4j.version>2.26.1</log4j.version>
+    <!-- HTTP/2 client for the OTLP/gRPC logs exporter (Graylog Open has no OTLP/HTTP input) -->
+    <okhttp.version>5.5.0</okhttp.version>
 
     <!-- test -->
     <junit.version>5.14.4</junit.version>
@@ -129,6 +131,13 @@
       <artifactId>opentelemetry-api</artifactId>
     </dependency>
 
+    <!-- OTLP/gRPC logs exporter (OtlpGrpcLogExporter): h2c prior knowledge + gRPC trailers -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp-jvm</artifactId>
+      <version>${okhttp.version}</version>
+    </dependency>
+
     <!-- Framework adapters: the application brings its own logging framework -->
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -163,6 +172,13 @@
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- h2c + gRPC trailers mock server for the OTLP exporter tests -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver3</artifactId>
+      <version>${okhttp.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
