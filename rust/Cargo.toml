@@ -23,8 +23,9 @@ path = "src/lib.rs"
 
 [features]
 default = ["tracing-layer", "log-bridge"]
-# Blocking wrapper (`blocking::GraylogClient`) that owns a one-worker tokio runtime.
-blocking = ["tokio/rt-multi-thread"]
+# Blocking wrapper (`blocking::GraylogClient`) that owns a one-worker multi-thread tokio
+# runtime (background batching and exports keep running between blocking calls).
+blocking = []
 # In-memory fakes and the conformance runner (`testing` module).
 testing = []
 # `tracing_subscriber::Layer` that forwards tracing events to a `LogClient` (`LogLayer`).
@@ -42,7 +43,7 @@ reqwest = { version = "0.12.9", default-features = false, features = ["rustls-tl
 serde = { version = "1.0.200", features = ["derive"] }
 serde_json = "1.0.120"
 sha2 = "0.10.8"
-tokio = { version = "1.43", features = ["rt", "time", "sync", "macros", "net", "io-util"] }
+tokio = { version = "1.43", features = ["rt", "rt-multi-thread", "time", "sync", "macros", "net", "io-util"] }
 tokio-util = { version = "0.7.11", default-features = false }
 tracing = { version = "0.1.40", default-features = false, features = ["std", "attributes"] }
 url = "2.5"

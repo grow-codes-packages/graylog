@@ -24,12 +24,12 @@ endif
 
 LANG_TARGETS := deps build lint test coverage license pack clean
 
-.PHONY: all help $(LANG_TARGETS) docs docs-site test-docker check sync
+.PHONY: all help $(LANG_TARGETS) docs docs-site test-docker check sync release-config release-check
 
 all: build
 
 help:
-	@echo "Targets: deps build lint test coverage license pack docs test-docker check sync clean"
+	@echo "Targets: deps build lint test coverage license pack release-check docs test-docker check sync clean"
 	@echo "LANGS=\"$(LANGS)\""
 
 $(LANG_TARGETS):
@@ -53,6 +53,19 @@ check:
 
 sync:
 	$(SDK_KIT) sync --dest .
+
+# Release readiness. release-config: release-please-config.json has the five packages with the
+# registry names of .sdk-kit.json, the version extra-files, and .release-please-manifest.json lists
+# all five; every package carries the version release-please expects. release-check: that plus the
+# language checks (metadata + dry-run publish) for LANGS.
+release-config:
+	python3 .github/scripts/release-check.py config
+
+release-check: release-config
+	@set -e; for lang in $(LANGS); do \
+	  echo "==> $$lang: make release-check"; \
+	  $(MAKE) --no-print-directory -C $$lang release-check; \
+	done
 
 # One integration run per language: unique Compose project, no host ports, and a trap that always
 # removes the stack with its volumes (also on failure and Ctrl-C).

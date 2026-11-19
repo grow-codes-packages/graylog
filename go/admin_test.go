@@ -265,7 +265,7 @@ func TestEnsureGelfInput(t *testing.T) {
 	})
 
 	t.Run("validation and list errors", func(t *testing.T) {
-		c := newTestClient(t, newTestServer(t, status(http.StatusUnauthorized)).URL, nil)
+		c := newTestClient(t, newTestServer(t, statusHandler(http.StatusUnauthorized)).URL, nil)
 		if _, err := c.EnsureGelfInput(ctx, "smtp", 1, fast); !errors.Is(err, ErrValidation) {
 			t.Fatal(err)
 		}
@@ -399,7 +399,7 @@ func TestStreamsAndIndexSets(t *testing.T) {
 	if _, err := nc.listAllStreams(ctx); !errors.Is(err, ErrUnavailable) {
 		t.Fatalf("list error: %v", err)
 	}
-	failing := newTestServer(t, status(http.StatusUnauthorized))
+	failing := newTestServer(t, statusHandler(http.StatusUnauthorized))
 	fc := newTestClient(t, failing.URL, nil)
 	if _, err := fc.CreateStream(ctx, CreateStreamOptions{Title: "t"}); !errors.Is(err, ErrAuthentication) {
 		t.Fatal(err)

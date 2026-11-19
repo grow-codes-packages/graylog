@@ -225,12 +225,7 @@ public final class Otlp {
     private static final long serialVersionUID = 1L;
 
     PermanentUnavailableException(String message) {
-      super(message);
-    }
-
-    @Override
-    public boolean retryable() {
-      return false;
+      super(message, null, null, false, null, null);
     }
   }
 
