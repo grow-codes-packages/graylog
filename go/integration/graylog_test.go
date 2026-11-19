@@ -49,15 +49,17 @@ func waitMessages(t *testing.T, c *graylog.Client, query string, n int, opts gra
 	deadline := time.Now().Add(60 * time.Second)
 	for {
 		res, err := c.Search(t.Context(), query, opts)
-		if err != nil {
-			t.Fatalf("search %q: %v", query, err)
-		}
-		if len(res.Messages) >= n {
+		if err == nil && len(res.Messages) >= n {
 			return res
 		}
 		if time.Now().After(deadline) {
+			if err != nil {
+				t.Fatalf("search %q: %v", query, err)
+			}
 			t.Fatalf("search %q: %d messages, want %d", query, len(res.Messages), n)
 		}
+		// A sort on a field that is not mapped yet (the first message is
+		// still being indexed) fails with "all shards failed": retry.
 		time.Sleep(500 * time.Millisecond)
 	}
 }
@@ -385,7 +387,9 @@ func TestLogQueryAndTail(t *testing.T) {
 	}
 	select {
 	case r := <-got:
-		if r.Body != run+" tail one" || r.Attributes["logger.name"] != "tail" {
+		// Graylog stores field names with "." replaced by "_": logger.name
+		// reads back as logger_name.
+		if r.Body != run+" tail one" || r.Attributes["logger_name"] != "tail" {
 			t.Fatalf("tail record %+v", r)
 		}
 	case <-time.After(60 * time.Second):

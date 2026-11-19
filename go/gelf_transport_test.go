@@ -429,7 +429,9 @@ func TestGelfHTTPTransport(t *testing.T) {
 	if r0.path != "/gelf" || r0.encoding != "gzip" || r0.ctype != "application/json" || r0.auth != "secret-value" || r0.requestedBy != DefaultRequestedBy {
 		t.Fatalf("request %+v", r0)
 	}
-	if lines := strings.Split(string(r0.body), "\n"); len(lines) != 3 || !strings.Contains(lines[2], `"short_message":"c"`) {
+	// Every message is newline-terminated, the last one too (Graylog 7.0
+	// drops messages on reused connections otherwise).
+	if lines := strings.Split(string(r0.body), "\n"); len(lines) != 4 || lines[3] != "" || !strings.Contains(lines[2], `"short_message":"c"`) {
 		t.Fatalf("bulk body %q", r0.body)
 	}
 	off := false
@@ -442,6 +444,9 @@ func TestGelfHTTPTransport(t *testing.T) {
 	single, _ := NewGelfHTTPTransport(GelfHTTPOptions{URL: ts.URL, DisableBulk: true, DisableGzip: true})
 	if res, err := single.Send(ctx, msgs, GelfSendOptions{}); err != nil || res.Sent != 3 || len(reqs) != 5 || reqs[2].path != "/gelf" || reqs[4].encoding != "" {
 		t.Fatalf("single %+v %v %+v", res, err, reqs)
+	}
+	if b := string(reqs[2].body); !strings.HasSuffix(b, "}\n") || strings.Count(b, "\n") != 1 {
+		t.Fatalf("single body must end with one newline: %q", b)
 	}
 	if _, err := single.Send(ctx, []*GelfMessage{nil}, GelfSendOptions{}); !errors.Is(err, ErrValidation) {
 		t.Fatal(err)

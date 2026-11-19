@@ -139,7 +139,7 @@ func TestNewLogClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	mu.Lock()
-	if len(httpBodies) != 1 || strings.Count(httpBodies[0], "\n") != 1 || !strings.Contains(httpBodies[0], `"level":3`) {
+	if len(httpBodies) != 1 || strings.Count(httpBodies[0], "\n") != 2 || !strings.HasSuffix(httpBodies[0], "\n") || !strings.Contains(httpBodies[0], `"level":3`) {
 		t.Fatalf("http bodies %q", httpBodies)
 	}
 	mu.Unlock()

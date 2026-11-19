@@ -479,7 +479,8 @@ type GelfHTTPOptions struct {
 	// DisableGzip sends uncompressed bodies (gzip is on by default).
 	DisableGzip bool
 	// DisableBulk posts one request per message, for inputs without
-	// enable_bulk_receiving. By default a batch is one newline-delimited body.
+	// enable_bulk_receiving. By default a batch is one body of newline-terminated
+	// messages.
 	DisableBulk bool
 	// Headers are extra request headers (for example the input's optional
 	// authorization header); sensitive values are redacted.
@@ -528,7 +529,7 @@ func NewGelfHTTPTransport(opts GelfHTTPOptions) (*GelfHTTPTransport, error) {
 // Protocol returns GelfHTTP.
 func (t *GelfHTTPTransport) Protocol() GelfProtocol { return GelfHTTP }
 
-// Send posts messages: one newline-delimited (bulk) body per call, or one
+// Send posts messages: one body of newline-terminated messages (bulk) per call, or one
 // request per message without bulk. Bodies are gzip-compressed unless
 // disabled (opts.Gzip overrides the transport default).
 func (t *GelfHTTPTransport) Send(ctx context.Context, messages []*GelfMessage, opts GelfSendOptions) (GelfSendResult, error) {
@@ -552,11 +553,15 @@ func (t *GelfHTTPTransport) Send(ctx context.Context, messages []*GelfMessage, o
 		}
 	}
 	for _, g := range groups {
-		parts := make([][]byte, len(g))
-		for i, m := range g {
-			parts[i] = m.Encode()
+		// Every message ends with "\n", also the last and single ones:
+		// Graylog 7.0 drops the first message of the third and later request
+		// on a reused connection otherwise.
+		var buf bytes.Buffer
+		for _, m := range g {
+			buf.Write(m.Encode())
+			buf.WriteByte('\n')
 		}
-		body := bytes.Join(parts, []byte("\n"))
+		body := buf.Bytes()
 		h := http.Header{HeaderRequestedBy: {DefaultRequestedBy}}
 		if gz {
 			body = compress(GelfCompressionGzip, body)
