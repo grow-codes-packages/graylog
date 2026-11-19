@@ -1,0 +1,37 @@
+{
+  "function": "createInput",
+  "case": "missing_requested_by",
+  "request": {
+    "method": "POST",
+    "path": "/api/system/inputs",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Basic <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "title": "x",
+      "type": "org.graylog2.inputs.gelf.http.GELFHttpInput",
+      "global": true,
+      "configuration": {
+        "bind_address": "0.0.0.0",
+        "port": 12299,
+        "enable_bulk_receiving": true,
+        "max_chunk_size": 1048576,
+        "number_worker_threads": 1,
+        "recv_buffer_size": 1048576
+      }
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "type": "ApiError",
+      "message": "CSRF protection header is missing. Please add a \"X-Requested-By\" header to your request."
+    }
+  }
+}
