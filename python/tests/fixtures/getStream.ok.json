@@ -1,0 +1,46 @@
+{
+  "function": "getStream",
+  "case": "ok",
+  "request": {
+    "method": "GET",
+    "path": "/api/streams/6afe0a6607ba3acebff1894e",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Basic <redacted>"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "id": "6afe0a6607ba3acebff1894e",
+      "creator_user_id": "admin",
+      "outputs": [],
+      "matching_type": "AND",
+      "description": "grow-sdk verify stream",
+      "created_at": "2026-11-18T20:28:22.806Z",
+      "disabled": false,
+      "rules": [
+        {
+          "field": "marker",
+          "stream_id": "6afe0a6607ba3acebff1894e",
+          "description": "marker",
+          "id": "6afe0a6607ba3acebff18951",
+          "type": 1,
+          "inverted": false,
+          "value": "growsdk179503370112643"
+        }
+      ],
+      "title": "grow-sdk growsdk179503370112643",
+      "content_pack": null,
+      "remove_matches_from_default_stream": false,
+      "index_set_id": "6afe0a4d07ba3acebff18718",
+      "categories": [],
+      "is_default": false,
+      "is_editable": true
+    }
+  }
+}

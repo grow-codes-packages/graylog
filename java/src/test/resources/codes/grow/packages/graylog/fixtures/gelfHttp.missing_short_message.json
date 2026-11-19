@@ -1,0 +1,22 @@
+{
+  "function": "gelfHttp",
+  "case": "missing_short_message",
+  "request": {
+    "method": "POST",
+    "path": "/gelf",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "version": "1.1",
+      "host": "x"
+    }
+  },
+  "response": {
+    "status": 202,
+    "headers": {},
+    "body": null
+  }
+}

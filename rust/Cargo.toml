@@ -13,7 +13,7 @@ homepage = "https://grow-codes-packages.github.io/graylog/"
 repository = "https://github.com/grow-codes-packages/graylog"
 documentation = "https://docs.rs/grow-graylog"
 readme = "README.md"
-keywords = ["grow-codes", "sdk", "client"]
+keywords = ["grow-codes", "sdk", "graylog", "gelf", "logging"]
 categories = ["api-bindings", "asynchronous"]
 include = ["src/**/*.rs", "Cargo.toml", "README.md", "LICENSE", "NOTICE"]
 
@@ -23,8 +23,8 @@ path = "src/lib.rs"
 
 [features]
 default = ["tracing-layer", "log-bridge"]
-# Blocking wrapper (`blocking::GraylogClient`) that owns a current-thread tokio runtime.
-blocking = []
+# Blocking wrapper (`blocking::GraylogClient`) that owns a one-worker tokio runtime.
+blocking = ["tokio/rt-multi-thread"]
 # In-memory fakes and the conformance runner (`testing` module).
 testing = []
 # `tracing_subscriber::Layer` that forwards tracing events to a `LogClient` (`LogLayer`).
@@ -38,11 +38,11 @@ bytes = "1.6"
 futures = { version = "0.3.30", default-features = false, features = ["std", "async-await"] }
 httpdate = "1.0"
 rand = { version = "0.9", default-features = false, features = ["std", "thread_rng"] }
-reqwest = { version = "0.12.9", default-features = false, features = ["rustls-tls-native-roots", "json", "gzip"] }
+reqwest = { version = "0.12.9", default-features = false, features = ["rustls-tls-native-roots", "json", "gzip", "http2"] }
 serde = { version = "1.0.200", features = ["derive"] }
 serde_json = "1.0.120"
 sha2 = "0.10.8"
-tokio = { version = "1.43", features = ["rt", "time", "sync", "macros"] }
+tokio = { version = "1.43", features = ["rt", "time", "sync", "macros", "net", "io-util"] }
 tokio-util = { version = "0.7.11", default-features = false }
 tracing = { version = "0.1.40", default-features = false, features = ["std", "attributes"] }
 url = "2.5"
@@ -53,12 +53,21 @@ log = { version = "0.4.22", optional = true, features = ["std", "kv"] }
 flate2 = "1.0.30"
 regex = "1.10"
 humantime = "2.1"
+base64 = "0.22"
+http = "1.1"
+http-body-util = "0.1.2"
+rustls = { version = "0.23.20", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+rustls-native-certs = "0.8"
+tokio-rustls = { version = "0.26.1", default-features = false, features = ["ring", "tls12", "logging"] }
 
 [dev-dependencies]
-tokio = { version = "1.43", features = ["rt-multi-thread", "macros", "time", "sync", "test-util"] }
+tokio = { version = "1.43", features = ["rt-multi-thread", "macros", "time", "sync", "test-util", "net", "io-util"] }
 wiremock = "0.6"
 tracing-subscriber = { version = "0.3.18", default-features = false, features = ["std", "fmt", "registry"] }
 serde_json = "1.0.120"
+hyper = { version = "1.5", features = ["server", "http2"] }
+hyper-util = { version = "0.1.10", features = ["tokio"] }
+bytes = "1.6"
 
 [package.metadata.docs.rs]
 all-features = true

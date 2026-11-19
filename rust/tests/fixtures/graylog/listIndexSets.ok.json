@@ -1,0 +1,133 @@
+{
+  "function": "listIndexSets",
+  "case": "ok",
+  "request": {
+    "method": "GET",
+    "path": "/api/system/indices/index_sets?skip_stats=true",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Basic <redacted>"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "total": 3,
+      "index_sets": [
+        {
+          "id": "6afe0a4d07ba3acebff18718",
+          "title": "Default index set",
+          "description": "The default index set",
+          "shards": 1,
+          "replicas": 0,
+          "index_optimization_max_num_segments": 1,
+          "index_optimization_disabled": false,
+          "field_type_refresh_interval": 5000,
+          "rotation_strategy_class": "org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy",
+          "rotation_strategy": {
+            "type": "org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig",
+            "index_lifetime_min": "P30D",
+            "index_lifetime_max": "P40D"
+          },
+          "retention_strategy_class": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy",
+          "retention_strategy": {
+            "type": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig",
+            "max_number_of_indices": 20
+          },
+          "data_tiering": {
+            "type": "hot_only",
+            "index_lifetime_min": "P30D",
+            "index_lifetime_max": "P40D"
+          },
+          "index_analyzer": "standard",
+          "field_type_profile": null,
+          "index_prefix": "graylog",
+          "creation_date": "2026-11-18T20:27:57.285Z",
+          "index_template_type": null,
+          "use_legacy_rotation": false,
+          "field_restrictions": null,
+          "can_be_default": true,
+          "default": true,
+          "writable": true
+        },
+        {
+          "id": "6afe0a4f07ba3acebff1881b",
+          "title": "Events",
+          "description": "Stores events created by event definitions.",
+          "shards": 1,
+          "replicas": 0,
+          "index_optimization_max_num_segments": 1,
+          "index_optimization_disabled": false,
+          "field_type_refresh_interval": 5000,
+          "rotation_strategy_class": "org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy",
+          "rotation_strategy": {
+            "type": "org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig",
+            "index_lifetime_min": "P30D",
+            "index_lifetime_max": "P40D"
+          },
+          "retention_strategy_class": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy",
+          "retention_strategy": {
+            "type": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig",
+            "max_number_of_indices": 20
+          },
+          "data_tiering": {
+            "type": "hot_only",
+            "index_lifetime_min": "P30D",
+            "index_lifetime_max": "P40D"
+          },
+          "index_analyzer": "standard",
+          "field_type_profile": null,
+          "index_prefix": "gl-events",
+          "creation_date": "2026-11-18T20:27:59.549Z",
+          "index_template_type": "events",
+          "use_legacy_rotation": false,
+          "field_restrictions": null,
+          "can_be_default": false,
+          "default": false,
+          "writable": true
+        },
+        {
+          "id": "6afe0a4f07ba3acebff1881e",
+          "title": "System Events",
+          "description": "Stores events created by and related to the system itself.",
+          "shards": 1,
+          "replicas": 0,
+          "index_optimization_max_num_segments": 1,
+          "index_optimization_disabled": false,
+          "field_type_refresh_interval": 5000,
+          "rotation_strategy_class": "org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy",
+          "rotation_strategy": {
+            "type": "org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig",
+            "index_lifetime_min": "P30D",
+            "index_lifetime_max": "P40D"
+          },
+          "retention_strategy_class": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy",
+          "retention_strategy": {
+            "type": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig",
+            "max_number_of_indices": 20
+          },
+          "data_tiering": {
+            "type": "hot_only",
+            "index_lifetime_min": "P30D",
+            "index_lifetime_max": "P40D"
+          },
+          "index_analyzer": "standard",
+          "field_type_profile": null,
+          "index_prefix": "gl-system-events",
+          "creation_date": "2026-11-18T20:27:59.569Z",
+          "index_template_type": "events",
+          "use_legacy_rotation": false,
+          "field_restrictions": null,
+          "can_be_default": false,
+          "default": false,
+          "writable": true
+        }
+      ],
+      "stats": {}
+    }
+  }
+}

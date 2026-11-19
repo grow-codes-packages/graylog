@@ -30,13 +30,17 @@ dependencies = [
   "opentelemetry-api>=1.27,<2",
   "opentelemetry-sdk>=1.27,<2",
   "opentelemetry-exporter-otlp-proto-http>=1.27,<2",
+  "opentelemetry-proto>=1.27,<2",
 ]
 
 [project.optional-dependencies]
 structlog = ["structlog>=24.1"]
+# OTLP/gRPC logs exporter for the Graylog OpenTelemetry (gRPC) input.
+otlp = ["grpcio>=1.62,<2"]
 # Every optional runtime extra (used by `make license`).
 all = [
   "grow-graylog[structlog]",
+  "grow-graylog[otlp]",
 ]
 dev = [
   "build>=1.2",
@@ -103,7 +107,7 @@ mypy_path = "src"
 files = ["src/grow_graylog", "tools"]
 
 [[tool.mypy.overrides]]
-module = ["respx.*"]
+module = ["respx.*", "grpc.*", "opentelemetry.proto.*"]
 ignore_missing_imports = true
 
 # --------------------------------------------------------------------------- pytest

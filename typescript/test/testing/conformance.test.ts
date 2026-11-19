@@ -13,10 +13,10 @@ const scenariosDir = fileURLToPath(new URL("../../../conformance/scenarios/", im
 let server: MockServer;
 
 beforeAll(async () => {
+  // Mock Graylog: lbstatus (health) and /api/system (ping, serverVersion).
   server = await startServer((req) => {
-    if (req.url === "/health") return { status: 200, body: { status: "ok" } };
-    if (req.url === "/version") return { status: 200, body: { version: "0.0.1" } };
-    if (req.url === "/v1/ping") return { status: 200, body: {} };
+    if (req.url === "/api/system/lbstatus") return { status: 200, body: "ALIVE" };
+    if (req.url === "/api/system") return { status: 200, body: { version: "7.0.16+58e0f6e" } };
     return { status: 404 };
   });
 });
@@ -30,13 +30,13 @@ function options(): ConformanceOptions {
     scenariosDir,
     categories: ["core"],
     factories: {
-      core: () => new GraylogClient({ url: server.url, token: "conformance-token" }),
+      core: () => new GraylogClient({ url: server.url, apiToken: "conformance-token" }),
     },
     capabilities: { core: ["version"] },
   };
 }
 
-describe("conformance (core) against a local demo API", () => {
+describe("conformance (core) against a mock Graylog", () => {
   it("every core scenario passes", async () => {
     const report = await runConformance(options());
     expect(report.failed, formatReport(report)).toBe(0);

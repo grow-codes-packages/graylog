@@ -1,0 +1,54 @@
+{
+  "function": "listInputTypes",
+  "case": "ok",
+  "request": {
+    "method": "GET",
+    "path": "/api/system/inputs/types",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Basic <redacted>"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "types": {
+        "org.graylog.plugins.cef.input.CEFUDPInput": "CEF UDP",
+        "org.graylog.plugins.beats.Beats2Input": "Beats",
+        "org.graylog2.inputs.misc.jsonpath.JsonPathInput": "JSON path value from HTTP API",
+        "org.graylog.integrations.ipfix.inputs.IpfixUdpInput": "IPFIX UDP",
+        "org.graylog.inputs.otel.OTelGrpcInput": "OpenTelemetry (gRPC)",
+        "org.graylog.plugins.cef.input.CEFKafkaInput": "CEF Kafka",
+        "org.graylog.integrations.aws.inputs.AWSInput": "AWS Kinesis/CloudWatch",
+        "org.graylog2.inputs.syslog.kafka.SyslogKafkaInput": "Syslog Kafka",
+        "org.graylog2.inputs.beats.kafka.BeatsKafkaInput": "Beats Kafka",
+        "org.graylog.integrations.inputs.paloalto11.PaloAlto11xInput": "Palo Alto Networks TCP (PAN-OS v11+)",
+        "org.graylog2.inputs.raw.http.RawHttpInput": "Raw HTTP",
+        "org.graylog2.inputs.raw.kafka.RawKafkaInput": "Raw/Plaintext Kafka",
+        "org.graylog2.inputs.gelf.amqp.GELFAMQPInput": "GELF AMQP",
+        "org.graylog.plugins.cef.input.CEFAmqpInput": "CEF AMQP",
+        "org.graylog2.inputs.gelf.udp.GELFUDPInput": "GELF UDP",
+        "org.graylog2.inputs.syslog.amqp.SyslogAMQPInput": "Syslog AMQP",
+        "org.graylog2.inputs.gelf.kafka.GELFKafkaInput": "GELF Kafka",
+        "org.graylog2.inputs.syslog.udp.SyslogUDPInput": "Syslog UDP",
+        "org.graylog2.inputs.syslog.tcp.SyslogTCPInput": "Syslog TCP",
+        "org.graylog.plugins.netflow.inputs.NetFlowUdpInput": "NetFlow UDP",
+        "org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput": "Palo Alto Networks TCP v8.x (deprecated)",
+        "org.graylog2.inputs.raw.tcp.RawTCPInput": "Raw/Plaintext TCP",
+        "org.graylog.plugins.cef.input.CEFTCPInput": "CEF TCP",
+        "org.graylog.integrations.inputs.paloalto9.PaloAlto9xInput": "Palo Alto Networks TCP v9.x (deprecated)",
+        "org.graylog2.inputs.raw.udp.RawUDPInput": "Raw/Plaintext UDP",
+        "org.graylog2.inputs.gelf.tcp.GELFTCPInput": "GELF TCP",
+        "org.graylog2.inputs.random.FakeHttpMessageInput": "Random HTTP message generator",
+        "org.graylog.aws.inputs.cloudtrail.CloudTrailInput": "AWS CloudTrail",
+        "org.graylog2.inputs.gelf.http.GELFHttpInput": "GELF HTTP",
+        "org.graylog.plugins.beats.BeatsInput": "Beats (deprecated)",
+        "org.graylog2.inputs.raw.amqp.RawAMQPInput": "Raw/Plaintext AMQP"
+      }
+    }
+  }
+}

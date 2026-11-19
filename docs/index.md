@@ -6,7 +6,7 @@
 
 One API for **Graylog Open** in five languages: TypeScript, Rust, Go, Python and Java. Every package
 has the same functions, options, defaults, error codes and behaviour, tested against a real
-`graylog/graylog:7.0 (+ MongoDB + OpenSearch)` in Docker.
+`graylog/graylog:7.0` (with OpenSearch 2.19 and MongoDB) in Docker.
 
 | Language | Package | Coverage |
 | - | - | - |
@@ -18,7 +18,8 @@ has the same functions, options, defaults, error codes and behaviour, tested aga
 
 ## What you get
 
-- **Client** with health, authenticated ping and server version ([Client](client.md)).
+- **Client** with health (`lbstatus`), authenticated ping, server version and system info
+  ([Client](client.md)).
 - **Configuration** from code or `GROW_GRAYLOG_*` / vendor environment variables, immutable
   and validated ([Configuration](configuration.md)).
 - **Retries** with full-jitter backoff and `Retry-After`, connect/request/total timeouts and
@@ -28,11 +29,14 @@ has the same functions, options, defaults, error codes and behaviour, tested aga
   ([Redaction](redaction.md)).
 - **Logging**: batching log client, logger facade, redaction processor, framework adapters and
   log search ([Logging](logging.md)).
-- **Service functions** for the Graylog Open API ([Functions](functions.md)).
+- **Graylog Open API** ([Functions](functions.md)): GELF over UDP (compression, chunking up to
+  128 chunks), TCP (NUL framing, TLS, reconnect) and HTTP (bulk, gzip); an OTLP/gRPC log exporter
+  for Graylog's OpenTelemetry input; Views search with Lucene queries, `getMessage` and a polling
+  `tail`; inputs (`ensureGelfInput`), streams and index sets administration.
 
 Start with [Install](install.md) and the [Quickstart](quickstart.md).
 
 !!! note "Independent project"
-    This SDK is made by [Grow Codes](https://grow.codes). Graylog Open is a trademark of
-    Graylog, Inc.. This project is not affiliated with or endorsed by Graylog, Inc.. See
+    This SDK is made by [Grow Codes](https://grow.codes). Graylog and Graylog Open are
+    trademarks of Graylog, Inc. This project is not affiliated with or endorsed by Graylog, Inc. See
     [License & disclaimer](license.md).

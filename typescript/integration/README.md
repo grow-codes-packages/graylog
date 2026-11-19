@@ -6,7 +6,7 @@ and runs the integration and conformance tests with `node --test` against a real
 ```sh
 cd typescript && make pack            # writes dist/grow-codes-graylog-<version>.tgz
 cd integration && npm run install-package
-GROW_GRAYLOG_URL=http://127.0.0.1:<port> GROW_GRAYLOG_TOKEN=... npm test
+GROW_GRAYLOG_URL=http://127.0.0.1:9000 GROW_GRAYLOG_API_TOKEN=... GRAYLOG_GELF_HOST=127.0.0.1 npm test
 ```
 
 In CI and locally with Docker this runs inside `docker/Dockerfile.typescript`

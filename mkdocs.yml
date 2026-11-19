@@ -117,7 +117,13 @@ nav:
   - Quickstart: quickstart.md
   - Configuration: configuration.md
   - Client: client.md
-  - Functions: functions.md
+  - Functions:
+      - functions.md
+      - Client and status: functions/client.md
+      - "Admin: inputs, streams, index sets": functions/admin.md
+      - Search: functions/search.md
+      - GELF messages and transports: functions/gelf.md
+      - Log client, OTLP and log query: functions/logging.md
   - Logging: logging.md
   - Error handling: errors.md
   - Hooks and logger: hooks.md

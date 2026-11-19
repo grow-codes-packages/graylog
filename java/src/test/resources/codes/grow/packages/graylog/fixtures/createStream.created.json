@@ -1,0 +1,43 @@
+{
+  "function": "createStream",
+  "case": "created",
+  "request": {
+    "method": "POST",
+    "path": "/api/streams",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Authorization": "Basic <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "entity": {
+        "title": "grow-sdk growsdk179503370112643",
+        "description": "grow-sdk verify stream",
+        "index_set_id": "6afe0a4d07ba3acebff18718",
+        "matching_type": "AND",
+        "remove_matches_from_default_stream": false,
+        "rules": [
+          {
+            "field": "marker",
+            "type": 1,
+            "value": "growsdk179503370112643",
+            "inverted": false,
+            "description": "marker"
+          }
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "location": "http://172.30.0.4:9000/streams/6afe0a6607ba3acebff1894e",
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "stream_id": "6afe0a6607ba3acebff1894e"
+    }
+  }
+}

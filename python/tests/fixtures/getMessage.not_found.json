@@ -1,0 +1,23 @@
+{
+  "function": "getMessage",
+  "case": "not_found",
+  "request": {
+    "method": "GET",
+    "path": "/api/messages/graylog_0/00000000-0000-0000-0000-000000000000",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Basic <redacted>"
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "type": "ApiError",
+      "message": "Specified message does not exist or the user does not have the required permissions"
+    }
+  }
+}

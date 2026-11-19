@@ -1,0 +1,29 @@
+{
+  "function": "gelfHttp",
+  "case": "single_accepted",
+  "request": {
+    "method": "POST",
+    "path": "/gelf",
+    "headers": {
+      "Accept": "application/json",
+      "X-Requested-By": "grow-sdk-verify",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "version": "1.1",
+      "host": "grow-sdk-verify",
+      "short_message": "growsdk179503370112643 http #0",
+      "timestamp": 1795033702.938,
+      "level": 6,
+      "_marker": "growsdk179503370112643",
+      "_seq": 0,
+      "_transport": "http",
+      "_bool_attr": "true"
+    }
+  },
+  "response": {
+    "status": 202,
+    "headers": {},
+    "body": null
+  }
+}

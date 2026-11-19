@@ -1,0 +1,22 @@
+{
+  "function": "health",
+  "case": "json_accept_406",
+  "request": {
+    "method": "GET",
+    "path": "/api/system/lbstatus",
+    "headers": {
+      "Accept": "application/json"
+    }
+  },
+  "response": {
+    "status": 406,
+    "headers": {
+      "x-graylog-node-id": "6d14d009-e915-4e0f-b29a-42607f6ee195",
+      "content-type": "application/json"
+    },
+    "body": {
+      "type": "ApiError",
+      "message": "HTTP 406 Not Acceptable"
+    }
+  }
+}
