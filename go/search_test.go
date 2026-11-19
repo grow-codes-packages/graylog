@@ -317,7 +317,7 @@ func TestLogQuery(t *testing.T) {
 	if body := query0(rec.last()); body["filter"] == nil {
 		t.Fatalf("streams filter %v", body)
 	}
-	failing := newTestClient(t, newTestServer(t, status(http.StatusUnauthorized)).URL, nil).LogQuery(LogQueryOptions{})
+	failing := newTestClient(t, newTestServer(t, statusHandler(http.StatusUnauthorized)).URL, nil).LogQuery(LogQueryOptions{})
 	if _, err := failing.Search(ctx, "x", SearchOptions{}); !errors.Is(err, ErrAuthentication) {
 		t.Fatal(err)
 	}

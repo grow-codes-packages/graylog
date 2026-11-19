@@ -457,7 +457,7 @@ func TestGelfHTTPTransport(t *testing.T) {
 		t.Fatalf("closed: %v", err)
 	}
 
-	failing := newTestServer(t, status(http.StatusUnauthorized))
+	failing := newTestServer(t, statusHandler(http.StatusUnauthorized))
 	ft, _ := NewGelfHTTPTransport(GelfHTTPOptions{URL: failing.URL + "/gelf"})
 	if res, err := ft.Send(ctx, msgs, GelfSendOptions{}); !errors.Is(err, ErrAuthentication) || res.Sent != 0 {
 		t.Fatalf("401: %+v %v", res, err)
