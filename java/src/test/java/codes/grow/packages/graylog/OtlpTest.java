@@ -361,6 +361,7 @@ class OtlpTest {
           OtlpGrpcLogExporter.builder("http://127.0.0.1:" + slowServer.getPort()).build();
       CompletableFuture<ExportResult> f = c.export(List.of(record("a")), PLAIN);
       assertThat(slowServer.takeRequest(5, TimeUnit.SECONDS)).isNotNull();
+      assertThat(f.isDone()).as("done before cancel: %s", f).isFalse();
       assertThat(f.cancel(true)).isTrue();
       assertThat(f.isCancelled()).isTrue();
       c.shutdown();

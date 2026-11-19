@@ -203,8 +203,11 @@ public final class OtlpGrpcLogExporter implements LogExporter {
           @Override
           public boolean cancel(boolean mayInterruptIfRunning) {
             cancelled.set(true);
+            // Cancel the future first: call.cancel() can run the failure callback synchronously,
+            // which would otherwise complete the future before it is marked cancelled.
+            boolean done = super.cancel(mayInterruptIfRunning);
             call.cancel();
-            return super.cancel(mayInterruptIfRunning);
+            return done;
           }
         };
     int n = records.size();
