@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/grow-codes-packages/graylog/compare/rust-v0.1.2...rust-v0.2.0) (2026-11-20)
+
+
+### Features
+
+* sync graylog to sdk-kit 0.4.0 (foundation API) ([#15](https://github.com/grow-codes-packages/graylog/issues/15)) ([7704662](https://github.com/grow-codes-packages/graylog/commit/7704662e8c9d249e4d8fc9a3992a414ec974dfd5))
+
 ## [0.1.2](https://github.com/grow-codes-packages/graylog/compare/rust-v0.1.1...rust-v0.1.2) (2026-11-19)
 
 
